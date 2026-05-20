@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Proyecto {
+  id       String   @id @default(cuid())
+  nombre   String
+  color    String   @default("#6366f1")
+  creadoEn DateTime @default(now())
+  eventos  Evento[]
+}
+
+model Evento {
+  id               String          @id @default(cuid())
+  proyectoId       String
+  proyecto         Proyecto        @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  nombre           String
+  descripcion      String?
+  fechaInicio      DateTime
+  fechaFin         DateTime
+  categoria        CategoriaEvento @default(OTRO)
+  estado           EstadoEvento    @default(PENDIENTE)
+  recurrencia      TipoRecurrencia @default(NINGUNA)
+  reglaRecurrencia Json?
+  eventoOriginalId      String?
+  intervaloNotificacion Int             @default(15)
+  ultimaNotificacion    DateTime?
+  tareas                Tarea[]
+  creadoEn              DateTime        @default(now())
+}
+
+model Tarea {
+  id           String    @id @default(cuid())
+  eventoId     String
+  evento       Evento    @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  titulo       String
+  descripcion  String?
+  prioridad    Prioridad @default(MEDIA)
+  completada   Boolean   @default(false)
+  completadaEn DateTime?
+  orden        Int       @default(0)
+  creadoEn     DateTime  @default(now())
+}
+
+model SuscripcionPush {
+  id       String   @id @default(cuid())
+  endpoint String   @unique
+  keys     Json
+  creadaEn DateTime @default(now())
+}
+
+enum CategoriaEvento {
+  REUNION
+  SESION
+  TALLER
+  OTRO
+}
+
+enum EstadoEvento {
+  PENDIENTE
+  ACTIVO
+  COMPLETADO
+}
+
+enum TipoRecurrencia {
+  NINGUNA
+  DIARIA
+  SEMANAL
+  MENSUAL
+  PERSONALIZADA
+}
+
+enum Prioridad {
+  ALTA
+  MEDIA
+  BAJA
+}

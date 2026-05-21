@@ -17,7 +17,7 @@ export default async function Proyectos() {
         {/* Header */}
         <div style={{
           padding: "56px 20px 20px",
-          paddingTop: "calc(56px + env(safe-area-inset-top))",
+          paddingTop: "max(64px, calc(14px + env(safe-area-inset-top)))",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

@@ -30,7 +30,7 @@ export default function Navbar() {
           width: 44,
           height: 44,
           borderRadius: "50%",
-          background: pathname === "/" ? "#a8ff3e" : "transparent",
+          background: pathname === "/" ? "#c5f135" : "transparent",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -48,13 +48,13 @@ export default function Navbar() {
           width: 52,
           height: 52,
           borderRadius: 18,
-          background: "#a8ff3e",
+          background: "#c5f135",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 0 0 6px rgba(139,92,246,0.15)",
+          boxShadow: "0 0 0 6px rgba(197,241,53,0.12)",
         }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </div>
@@ -66,7 +66,7 @@ export default function Navbar() {
           width: 44,
           height: 44,
           borderRadius: "50%",
-          background: pathname === "/proyectos" ? "#a8ff3e" : "transparent",
+          background: pathname === "/proyectos" ? "#c5f135" : "transparent",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

@@ -71,7 +71,7 @@ export default async function Dashboard() {
 
         {/* ── Stats pills ──────────────────────── */}
         <div style={{ padding: "0 20px 24px", display: "flex", gap: 8 }}>
-          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#a8ff3e" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: "#fff" }}>
+          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#c5f135" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: "#fff" }}>
             {eventosActivos.length} activo{eventosActivos.length !== 1 ? "s" : ""}
           </div>
           <div style={{ padding: "7px 14px", borderRadius: 999, background: "#1c1c1c", fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>
@@ -95,7 +95,7 @@ export default async function Dashboard() {
                 href={`/eventos/${evento.id}/sesion`}
                 style={{
                   display: "block",
-                  background: "#a8ff3e",
+                  background: "#c5f135",
                   borderRadius: 24,
                   padding: "24px",
                   textDecoration: "none",
@@ -176,7 +176,7 @@ export default async function Dashboard() {
           <section>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
               <p className="section-title">Próximos eventos</p>
-              <Link href="/proyectos" style={{ fontSize: "0.78rem", fontWeight: 600, color: "#a8ff3e", textDecoration: "none" }}>
+              <Link href="/proyectos" style={{ fontSize: "0.78rem", fontWeight: 600, color: "#c5f135", textDecoration: "none" }}>
                 Ver todos
               </Link>
             </div>
@@ -190,7 +190,7 @@ export default async function Dashboard() {
                   display: "inline-block",
                   padding: "10px 22px",
                   borderRadius: 12,
-                  background: "#a8ff3e",
+                  background: "#c5f135",
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: "0.85rem",
@@ -252,7 +252,7 @@ export default async function Dashboard() {
                   display: "inline-block",
                   padding: "10px 22px",
                   borderRadius: 12,
-                  background: "#a8ff3e",
+                  background: "#c5f135",
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: "0.85rem",

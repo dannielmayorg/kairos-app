@@ -30,13 +30,13 @@ export default function Navbar() {
           width: 44,
           height: 44,
           borderRadius: "50%",
-          background: pathname === "/" ? "#8b5cf6" : "transparent",
+          background: pathname === "/" ? "#a8ff3e" : "transparent",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           transition: "background 0.2s",
         }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={pathname === "/" ? "#fff" : "rgba(255,255,255,0.4)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={pathname === "/" ? "#000" : "rgba(255,255,255,0.4)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 12L12 3l9 9" /><path d="M9 21V12h6v9" />
           </svg>
         </div>
@@ -48,7 +48,7 @@ export default function Navbar() {
           width: 52,
           height: 52,
           borderRadius: 18,
-          background: "#8b5cf6",
+          background: "#a8ff3e",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -66,13 +66,13 @@ export default function Navbar() {
           width: 44,
           height: 44,
           borderRadius: "50%",
-          background: pathname === "/proyectos" ? "#8b5cf6" : "transparent",
+          background: pathname === "/proyectos" ? "#a8ff3e" : "transparent",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           transition: "background 0.2s",
         }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={pathname === "/proyectos" ? "#fff" : "rgba(255,255,255,0.4)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={pathname === "/proyectos" ? "#000" : "rgba(255,255,255,0.4)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" />
             <rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" />
           </svg>

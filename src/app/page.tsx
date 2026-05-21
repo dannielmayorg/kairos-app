@@ -71,7 +71,7 @@ export default async function Dashboard() {
 
         {/* ── Stats pills ──────────────────────── */}
         <div style={{ padding: "0 20px 24px", display: "flex", gap: 8 }}>
-          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#8b5cf6" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: "#fff" }}>
+          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#a8ff3e" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: "#fff" }}>
             {eventosActivos.length} activo{eventosActivos.length !== 1 ? "s" : ""}
           </div>
           <div style={{ padding: "7px 14px", borderRadius: 999, background: "#1c1c1c", fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>
@@ -95,7 +95,7 @@ export default async function Dashboard() {
                 href={`/eventos/${evento.id}/sesion`}
                 style={{
                   display: "block",
-                  background: "#8b5cf6",
+                  background: "#a8ff3e",
                   borderRadius: 24,
                   padding: "24px",
                   textDecoration: "none",
@@ -124,32 +124,32 @@ export default async function Dashboard() {
                 }} />
 
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, position: "relative" }}>
-                  <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "rgba(0,0,0,0.55)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     En sesión
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.2)", borderRadius: 999, padding: "4px 12px" }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80" }} />
-                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#fff" }}>Activo</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(0,0,0,0.15)", borderRadius: 999, padding: "4px 12px" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#000" }} />
+                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#000" }}>Activo</span>
                   </div>
                 </div>
 
-                <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", marginBottom: 4, position: "relative" }}>
+                <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000", letterSpacing: "-0.02em", marginBottom: 4, position: "relative" }}>
                   {evento.nombre}
                 </p>
-                <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", marginBottom: 20, position: "relative" }}>
+                <p style={{ fontSize: "0.8rem", color: "rgba(0,0,0,0.5)", marginBottom: 20, position: "relative" }}>
                   {evento.proyecto.nombre} · {pendientes} tareas pendientes
                 </p>
 
                 {/* Progress */}
                 <div style={{ position: "relative" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)", fontWeight: 600 }}>
+                    <span style={{ fontSize: "0.72rem", color: "rgba(0,0,0,0.5)", fontWeight: 600 }}>
                       {completadas(evento.tareas)} de {total}
                     </span>
-                    <span style={{ fontSize: "0.72rem", color: "#fff", fontWeight: 700 }}>{pct}%</span>
+                    <span style={{ fontSize: "0.72rem", color: "#000", fontWeight: 700 }}>{pct}%</span>
                   </div>
-                  <div className="progress-track" style={{ height: 5 }}>
-                    <div className="progress-fill" style={{ height: 5, width: `${pct}%` }} />
+                  <div style={{ background: "rgba(0,0,0,0.15)", borderRadius: 999, height: 5, overflow: "hidden" }}>
+                    <div style={{ height: 5, width: `${pct}%`, background: "#000", borderRadius: 999, transition: "width 0.5s ease" }} />
                   </div>
                 </div>
 
@@ -160,13 +160,13 @@ export default async function Dashboard() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  background: "rgba(0,0,0,0.25)",
+                  background: "rgba(0,0,0,0.18)",
                   borderRadius: 14,
                   padding: "12px",
                   position: "relative",
                 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21" /></svg>
-                  <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem" }}>Abrir sesión</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21" /></svg>
+                  <span style={{ color: "#000", fontWeight: 700, fontSize: "0.9rem" }}>Abrir sesión</span>
                 </div>
               </Link>
             );
@@ -176,7 +176,7 @@ export default async function Dashboard() {
           <section>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
               <p className="section-title">Próximos eventos</p>
-              <Link href="/proyectos" style={{ fontSize: "0.78rem", fontWeight: 600, color: "#8b5cf6", textDecoration: "none" }}>
+              <Link href="/proyectos" style={{ fontSize: "0.78rem", fontWeight: 600, color: "#a8ff3e", textDecoration: "none" }}>
                 Ver todos
               </Link>
             </div>
@@ -190,7 +190,7 @@ export default async function Dashboard() {
                   display: "inline-block",
                   padding: "10px 22px",
                   borderRadius: 12,
-                  background: "#8b5cf6",
+                  background: "#a8ff3e",
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: "0.85rem",
@@ -252,7 +252,7 @@ export default async function Dashboard() {
                   display: "inline-block",
                   padding: "10px 22px",
                   borderRadius: 12,
-                  background: "#8b5cf6",
+                  background: "#a8ff3e",
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: "0.85rem",

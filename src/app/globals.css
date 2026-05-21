@@ -1,22 +1,122 @@
 @import "tailwindcss";
 
 :root {
-  --kairos-purple: #6366f1;
-  --kairos-dark: #0f0f1a;
-  --kairos-card: #1a1a2e;
-  --kairos-border: #2d2d4a;
-  --background: #0f0f1a;
-  --foreground: #e2e8f0;
+  --bg:        #09090f;
+  --bg-2:      #0f0f1c;
+  --surface:   rgba(255, 255, 255, 0.04);
+  --surface-2: rgba(255, 255, 255, 0.08);
+  --border:    rgba(255, 255, 255, 0.08);
+  --border-2:  rgba(255, 255, 255, 0.14);
+  --purple:    #8b5cf6;
+  --purple-2:  #7c3aed;
+  --purple-glow: rgba(139, 92, 246, 0.3);
+  --text-1:    #f1f5f9;
+  --text-2:    #94a3b8;
+  --text-3:    #475569;
+  --green:     #10b981;
+  --red:       #ef4444;
+  --yellow:    #f59e0b;
+
+  --background: var(--bg);
+  --foreground: var(--text-1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text-1);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background-color: var(--bg);
 }
 
 body {
-  background-color: var(--kairos-dark);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-1);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
   min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+/* ── Glass card ───────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.card:hover {
+  border-color: var(--border-2);
+  background: var(--surface-2);
+}
+
+/* ── Pill badge ───────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Purple button ────────────────────────────────────── */
+.btn-purple {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-2) 100%);
+  color: #fff;
+  border-radius: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 4px 24px var(--purple-glow);
+}
+.btn-purple:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+/* ── Ghost button ─────────────────────────────────────── */
+.btn-ghost {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-radius: 14px;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-ghost:active {
+  transform: scale(0.97);
+}
+
+/* ── Progress bar ─────────────────────────────────────── */
+.progress-track {
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  background: linear-gradient(90deg, var(--purple) 0%, #a78bfa 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Section label ────────────────────────────────────── */
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ── Bottom nav safe area ─────────────────────────────── */
+.has-bottom-nav {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }

@@ -23,10 +23,10 @@ type Evento = {
   tareas: Tarea[];
 };
 
-const prioridadColor: Record<string, string> = {
-  ALTA: "text-red-400",
-  MEDIA: "text-yellow-400",
-  BAJA: "text-slate-500",
+const prioridadConfig: Record<string, { label: string; color: string; bg: string }> = {
+  ALTA:  { label: "Alta",  color: "#ef4444", bg: "rgba(239,68,68,0.12)" },
+  MEDIA: { label: "Media", color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
+  BAJA:  { label: "Baja",  color: "#475569", bg: "rgba(71,85,105,0.12)" },
 };
 
 export default function SesionPage() {
@@ -41,9 +41,7 @@ export default function SesionPage() {
     setCargando(false);
   }, [id]);
 
-  useEffect(() => {
-    cargar();
-  }, [cargar]);
+  useEffect(() => { cargar(); }, [cargar]);
 
   const toggleTarea = async (tareaId: string) => {
     await fetch(`/api/tareas/${tareaId}/completar`, { method: "PATCH" });
@@ -61,16 +59,22 @@ export default function SesionPage() {
 
   if (cargando) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <p className="text-slate-500 animate-pulse">Cargando sesión...</p>
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: "var(--bg)" }}>
+        <div style={{ textAlign: "center" }}>
+          <div
+            className="rounded-2xl mb-4 mx-auto"
+            style={{ width: 48, height: 48, background: "rgba(139,92,246,0.2)", animation: "pulse 1.5s infinite" }}
+          />
+          <p style={{ color: "var(--text-3)", fontSize: "0.85rem" }}>Cargando sesión...</p>
+        </div>
       </div>
     );
   }
 
   if (!evento) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <p className="text-slate-500">Evento no encontrado.</p>
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: "var(--bg)" }}>
+        <p style={{ color: "var(--text-3)" }}>Evento no encontrado.</p>
       </div>
     );
   }
@@ -82,70 +86,154 @@ export default function SesionPage() {
     : 0;
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--kairos-dark)" }}>
+    <div className="min-h-dvh flex flex-col" style={{ background: "var(--bg)" }}>
+
+      {/* Header */}
       <header
-        className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
-        style={{ backgroundColor: "var(--kairos-card)", borderBottom: "1px solid var(--kairos-border)" }}
+        className="sticky top-0 z-50 px-5 py-4 flex items-center justify-between"
+        style={{
+          background: "rgba(9,9,15,0.85)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderBottom: "1px solid var(--border)",
+        }}
       >
-        <div className="flex items-center gap-3">
-          <Link href={`/eventos/${id}`} className="text-slate-400 hover:text-slate-200">
-            ← Volver
-          </Link>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
-            Sesión activa
-          </span>
-        </div>
+        <Link
+          href={`/eventos/${id}`}
+          className="flex items-center gap-2"
+          style={{ color: "var(--text-2)", fontSize: "0.9rem" }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+          Volver
+        </Link>
+
+        <span
+          className="badge"
+          style={{ background: "rgba(16,185,129,0.15)", color: "var(--green)", border: "1px solid rgba(16,185,129,0.25)" }}
+        >
+          Sesión activa
+        </span>
+
         <button
           onClick={completarEvento}
-          className="px-3 py-1.5 rounded-lg bg-slate-700 text-white text-xs font-medium hover:bg-slate-600 transition-colors"
+          className="btn-ghost px-3 py-1.5 text-xs"
         >
-          Completar evento
+          Completar
         </button>
       </header>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 space-y-6">
-        <div>
-          <div
-            className="text-xs font-medium mb-1"
-            style={{ color: evento.proyecto.color }}
+      <main className="flex-1 px-5 py-6 space-y-6 pb-10">
+
+        {/* Event info */}
+        <div
+          className="card p-5"
+          style={{ borderLeft: `3px solid ${evento.proyecto.color}` }}
+        >
+          <span
+            className="badge mb-2"
+            style={{ background: `${evento.proyecto.color}18`, color: evento.proyecto.color, border: `1px solid ${evento.proyecto.color}33` }}
           >
             {evento.proyecto.nombre}
-          </div>
-          <h1 className="text-2xl font-bold text-slate-200">{evento.nombre}</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          </span>
+          <h1 style={{ color: "var(--text-1)", fontWeight: 700, fontSize: "1.3rem", marginTop: 4 }}>
+            {evento.nombre}
+          </h1>
+          <p style={{ color: "var(--text-3)", fontSize: "0.8rem", marginTop: 4 }}>
             {formatHora(evento.fechaInicio)} — {formatHora(evento.fechaFin)}
           </p>
+
+          {/* Progress */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <span style={{ color: "var(--text-3)", fontSize: "0.75rem" }}>
+                {completadas.length} de {evento.tareas.length} completadas
+              </span>
+              <span style={{ color: "var(--purple)", fontSize: "0.8rem", fontWeight: 700 }}>
+                {progreso}%
+              </span>
+            </div>
+            <div className="progress-track" style={{ height: 6 }}>
+              <div className="progress-fill" style={{ height: 6, width: `${progreso}%` }} />
+            </div>
+          </div>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
-            <span>{completadas.length} de {evento.tareas.length} completadas</span>
-            <span>{progreso}%</span>
-          </div>
-          <div className="w-full rounded-full h-2" style={{ backgroundColor: "var(--kairos-border)" }}>
+        {/* ¡Todas completadas! */}
+        {pendientes.length === 0 && evento.tareas.length > 0 && (
+          <div className="card p-8 text-center">
             <div
-              className="h-2 rounded-full transition-all duration-500"
-              style={{ width: `${progreso}%`, backgroundColor: "var(--kairos-purple)" }}
-            />
+              className="rounded-2xl flex items-center justify-center mx-auto mb-3"
+              style={{ width: 56, height: 56, background: "rgba(16,185,129,0.15)", fontSize: "1.5rem" }}
+            >
+              ✓
+            </div>
+            <p style={{ color: "var(--text-1)", fontWeight: 700, fontSize: "1.1rem" }}>
+              ¡Todas completadas!
+            </p>
+            <button
+              onClick={completarEvento}
+              className="btn-purple mt-4 px-6 py-2.5 text-sm"
+            >
+              Completar evento
+            </button>
           </div>
-        </div>
+        )}
 
+        {/* Pendientes */}
         {pendientes.length > 0 && (
           <section>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">
-              Pendientes ({pendientes.length})
-            </h2>
+            <p className="section-label mb-3">Pendientes ({pendientes.length})</p>
             <div className="space-y-2">
-              {pendientes.map((t) => (
+              {pendientes.map((t) => {
+                const cfg = prioridadConfig[t.prioridad] ?? prioridadConfig.BAJA;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => toggleTarea(t.id)}
+                    className="card w-full px-4 py-3.5 flex items-center gap-3 text-left"
+                  >
+                    <div
+                      className="flex-shrink-0 rounded-lg border-2 flex items-center justify-center"
+                      style={{ width: 22, height: 22, borderColor: "var(--border-2)" }}
+                    />
+                    <span className="flex-1" style={{ color: "var(--text-1)", fontSize: "0.9rem" }}>
+                      {t.titulo}
+                    </span>
+                    <span
+                      className="badge"
+                      style={{ background: cfg.bg, color: cfg.color }}
+                    >
+                      {cfg.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Completadas */}
+        {completadas.length > 0 && (
+          <section>
+            <p className="section-label mb-3">Completadas ({completadas.length})</p>
+            <div className="space-y-2">
+              {completadas.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => toggleTarea(t.id)}
-                  className="card w-full px-4 py-3 flex items-center gap-3 text-left hover:border-indigo-500/50 transition-colors"
+                  className="card w-full px-4 py-3.5 flex items-center gap-3 text-left"
+                  style={{ opacity: 0.45 }}
                 >
-                  <div className="w-5 h-5 rounded border-2 border-slate-600 flex-shrink-0 hover:border-indigo-500" />
-                  <span className="flex-1 text-sm text-slate-200">{t.titulo}</span>
-                  <span className={`text-xs ${prioridadColor[t.prioridad] ?? "text-slate-500"}`}>
-                    {t.prioridad.charAt(0) + t.prioridad.slice(1).toLowerCase()}
+                  <div
+                    className="flex-shrink-0 rounded-lg flex items-center justify-center"
+                    style={{ width: 22, height: 22, background: "var(--purple)", color: "#fff", fontSize: "0.75rem" }}
+                  >
+                    ✓
+                  </div>
+                  <span className="flex-1 line-through" style={{ color: "var(--text-3)", fontSize: "0.9rem" }}>
+                    {t.titulo}
                   </span>
                 </button>
               ))}
@@ -153,40 +241,6 @@ export default function SesionPage() {
           </section>
         )}
 
-        {pendientes.length === 0 && evento.tareas.length > 0 && (
-          <div className="card p-8 text-center">
-            <p className="text-2xl mb-2">🎉</p>
-            <p className="text-slate-200 font-medium">¡Todas las tareas completadas!</p>
-            <button
-              onClick={completarEvento}
-              className="mt-4 px-6 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
-            >
-              Completar evento
-            </button>
-          </div>
-        )}
-
-        {completadas.length > 0 && (
-          <section>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-600 mb-3">
-              Completadas ({completadas.length})
-            </h2>
-            <div className="space-y-2">
-              {completadas.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => toggleTarea(t.id)}
-                  className="card w-full px-4 py-3 flex items-center gap-3 text-left opacity-50 hover:opacity-70 transition-opacity"
-                >
-                  <div className="w-5 h-5 rounded border-2 border-indigo-600 bg-indigo-600 flex items-center justify-center flex-shrink-0 text-white text-xs">
-                    ✓
-                  </div>
-                  <span className="flex-1 text-sm text-slate-400 line-through">{t.titulo}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );

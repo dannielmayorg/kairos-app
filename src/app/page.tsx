@@ -8,7 +8,6 @@ import { sincronizarEstados } from "./api/cron/notificaciones/route";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  // Auto-activar/completar eventos según la hora actual
   await sincronizarEstados();
 
   const [proyectos, eventosActivos, eventosPendientes] = await Promise.all([
@@ -25,160 +24,192 @@ export default async function Dashboard() {
       orderBy: { fechaInicio: "asc" },
     }),
     prisma.evento.findMany({
-      where: {
-        estado: "PENDIENTE",
-        fechaInicio: { gte: new Date() },
-      },
+      where: { estado: "PENDIENTE", fechaInicio: { gte: new Date() } },
       include: { proyecto: { select: { nombre: true, color: true } } },
       orderBy: { fechaInicio: "asc" },
       take: 5,
     }),
   ]);
 
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
+
   return (
     <>
-      <Navbar />
       <PushSubscriber />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-indigo-400">
-              K.A.I.R.O.S.
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Kind of An Intelligent Reminder, Obviously Superior
-            </p>
-          </div>
-          <Link
-            href="/nuevo-evento"
-            className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
+      <main className="has-bottom-nav min-h-dvh" style={{ background: "var(--bg)" }}>
+
+        {/* ── Header ──────────────────────────────────── */}
+        <div
+          className="px-5 pt-14 pb-8"
+          style={{
+            background: "linear-gradient(180deg, rgba(124,58,237,0.18) 0%, transparent 100%)",
+          }}
+        >
+          <p style={{ color: "var(--text-3)", fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            {saludo}
+          </p>
+          <h1
+            className="mt-1 font-bold tracking-tight"
+            style={{ fontSize: "2rem", color: "var(--text-1)" }}
           >
-            + Nuevo evento
-          </Link>
+            K.A.I.R.O.S.
+          </h1>
+          <p style={{ color: "var(--text-3)", fontSize: "0.75rem", marginTop: 2 }}>
+            Kind of An Intelligent Reminder, Obviously Superior
+          </p>
+
+          {/* Stats pill row */}
+          <div className="flex gap-3 mt-5">
+            <div className="badge" style={{ background: "rgba(139,92,246,0.15)", color: "var(--purple)", border: "1px solid rgba(139,92,246,0.25)" }}>
+              {eventosActivos.length} activo{eventosActivos.length !== 1 ? "s" : ""}
+            </div>
+            <div className="badge" style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
+              {eventosPendientes.length} próximo{eventosPendientes.length !== 1 ? "s" : ""}
+            </div>
+            <div className="badge" style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
+              {proyectos.length} proyecto{proyectos.length !== 1 ? "s" : ""}
+            </div>
+          </div>
         </div>
 
-        {eventosActivos.length > 0 && (
-          <section>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-3">
-              En sesión ahora
-            </h2>
-            <div className="space-y-3">
-              {eventosActivos.map((evento) => {
-                const pendientes = evento.tareas.filter((t) => !t.completada).length;
-                const total = evento.tareas.length;
-                return (
-                  <Link
-                    key={evento.id}
-                    href={`/eventos/${evento.id}/sesion`}
-                    className="card p-4 flex items-center justify-between hover:border-indigo-500/50 transition-colors"
-                    style={{ borderLeft: `3px solid ${evento.proyecto.color}` }}
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className="text-xs px-2 py-0.5 rounded-full text-white"
-                          style={{ backgroundColor: evento.proyecto.color }}
-                        >
-                          {evento.proyecto.nombre}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
-                          Activo
-                        </span>
+        <div className="px-5 space-y-8">
+
+          {/* ── Sesiones activas ─────────────────────── */}
+          {eventosActivos.length > 0 && (
+            <section>
+              <p className="section-label mb-3">En sesión ahora</p>
+              <div className="space-y-3">
+                {eventosActivos.map((evento) => {
+                  const pendientes = evento.tareas.filter((t) => !t.completada).length;
+                  const total = evento.tareas.length;
+                  const pct = total > 0 ? Math.round(((total - pendientes) / total) * 100) : 0;
+                  return (
+                    <Link
+                      key={evento.id}
+                      href={`/eventos/${evento.id}/sesion`}
+                      className="card p-4 block"
+                      style={{ borderLeft: `3px solid ${evento.proyecto.color}` }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="badge"
+                            style={{ background: `${evento.proyecto.color}22`, color: evento.proyecto.color, border: `1px solid ${evento.proyecto.color}44` }}
+                          >
+                            {evento.proyecto.nombre}
+                          </span>
+                          <span className="badge" style={{ background: "rgba(16,185,129,0.15)", color: "var(--green)", border: "1px solid rgba(16,185,129,0.25)" }}>
+                            Activo
+                          </span>
+                        </div>
+                        <span style={{ color: "var(--purple)", fontSize: "0.8rem", fontWeight: 600 }}>Ver →</span>
                       </div>
-                      <p className="font-semibold text-slate-200">{evento.nombre}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p style={{ color: "var(--text-1)", fontWeight: 600, fontSize: "1rem" }}>{evento.nombre}</p>
+                      <p style={{ color: "var(--text-3)", fontSize: "0.75rem", marginTop: 2 }}>
                         {pendientes} de {total} tareas pendientes
                       </p>
-                    </div>
-                    <span className="text-indigo-400 text-sm">Ver sesión →</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                      <div className="progress-track mt-3" style={{ height: 4 }}>
+                        <div className="progress-fill" style={{ height: 4, width: `${pct}%` }} />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-              Próximos eventos
-            </h2>
-            <Link href="/proyectos" className="text-xs text-indigo-400 hover:underline">
-              Ver proyectos →
-            </Link>
-          </div>
-          {eventosPendientes.length === 0 ? (
-            <div className="card p-8 text-center text-slate-500">
-              <p>No hay eventos próximos.</p>
-              <Link
-                href="/nuevo-evento"
-                className="mt-3 inline-block text-indigo-400 hover:underline text-sm"
-              >
-                Crear un evento →
+          {/* ── Próximos eventos ─────────────────────── */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <p className="section-label">Próximos eventos</p>
+              <Link href="/proyectos" style={{ color: "var(--purple)", fontSize: "0.75rem", fontWeight: 600 }}>
+                Ver todos →
               </Link>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {eventosPendientes.map((evento) => (
+
+            {eventosPendientes.length === 0 ? (
+              <div className="card p-8 text-center">
+                <p style={{ color: "var(--text-3)", fontSize: "0.9rem" }}>No hay eventos próximos.</p>
                 <Link
-                  key={evento.id}
-                  href={`/eventos/${evento.id}`}
-                  className="card p-4 flex items-center justify-between hover:border-indigo-500/50 transition-colors"
+                  href="/nuevo-evento"
+                  className="btn-purple inline-block mt-4 px-5 py-2.5 text-sm"
                 >
-                  <div className="flex items-center gap-3">
+                  + Crear evento
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {eventosPendientes.map((evento) => (
+                  <Link
+                    key={evento.id}
+                    href={`/eventos/${evento.id}`}
+                    className="card px-4 py-3 flex items-center gap-3"
+                  >
                     <div
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: evento.proyecto.color }}
-                    />
-                    <div>
-                      <p className="font-medium text-slate-200">{evento.nombre}</p>
-                      <p className="text-xs text-slate-500">
+                      className="flex-shrink-0 rounded-xl flex items-center justify-center"
+                      style={{ width: 40, height: 40, background: `${evento.proyecto.color}18`, border: `1px solid ${evento.proyecto.color}33` }}
+                    >
+                      <div className="rounded-full" style={{ width: 8, height: 8, background: evento.proyecto.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p style={{ color: "var(--text-1)", fontWeight: 600, fontSize: "0.9rem" }} className="truncate">
+                        {evento.nombre}
+                      </p>
+                      <p style={{ color: "var(--text-3)", fontSize: "0.75rem", marginTop: 1 }}>
                         {formatFecha(evento.fechaInicio)} · {formatHora(evento.fechaInicio)}
                       </p>
                     </div>
-                  </div>
-                  <span className="text-xs text-slate-500">{evento.proyecto.nombre}</span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
+                    <span style={{ color: "var(--text-3)", fontSize: "0.75rem" }}>{evento.proyecto.nombre}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
 
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-              Proyectos
-            </h2>
-          </div>
-          {proyectos.length === 0 ? (
-            <div className="card p-8 text-center text-slate-500">
-              <p>Aún no tienes proyectos.</p>
-              <Link
-                href="/nuevo-proyecto"
-                className="mt-3 inline-block text-indigo-400 hover:underline text-sm"
-              >
-                Crear tu primer proyecto →
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {proyectos.map((p) => (
+          {/* ── Proyectos ────────────────────────────── */}
+          <section>
+            <p className="section-label mb-3">Proyectos</p>
+            {proyectos.length === 0 ? (
+              <div className="card p-8 text-center">
+                <p style={{ color: "var(--text-3)", fontSize: "0.9rem" }}>Aún no tienes proyectos.</p>
                 <Link
-                  key={p.id}
-                  href={`/proyectos/${p.id}`}
-                  className="card p-4 hover:border-indigo-500/50 transition-colors"
-                  style={{ borderTop: `3px solid ${p.color}` }}
+                  href="/nuevo-proyecto"
+                  className="btn-purple inline-block mt-4 px-5 py-2.5 text-sm"
                 >
-                  <p className="font-medium text-slate-200 truncate">{p.nombre}</p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {p._count.eventos} evento{p._count.eventos !== 1 ? "s" : ""}
-                  </p>
+                  + Crear proyecto
                 </Link>
-              ))}
-            </div>
-          )}
-        </section>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {proyectos.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/proyectos/${p.id}`}
+                    className="card p-4"
+                    style={{ borderTop: `2px solid ${p.color}` }}
+                  >
+                    <div
+                      className="rounded-xl mb-3 flex items-center justify-center"
+                      style={{ width: 36, height: 36, background: `${p.color}18` }}
+                    >
+                      <div className="rounded-full" style={{ width: 10, height: 10, background: p.color }} />
+                    </div>
+                    <p style={{ color: "var(--text-1)", fontWeight: 600, fontSize: "0.9rem" }} className="truncate">
+                      {p.nombre}
+                    </p>
+                    <p style={{ color: "var(--text-3)", fontSize: "0.72rem", marginTop: 2 }}>
+                      {p._count.eventos} evento{p._count.eventos !== 1 ? "s" : ""}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+        </div>
       </main>
+      <Navbar />
     </>
   );
 }

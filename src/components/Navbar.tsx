@@ -8,6 +8,8 @@ export default function Navbar() {
 
   return (
     <nav
+      role="navigation"
+      aria-label="Navegación principal"
       style={{
         position: "fixed",
         bottom: 0,
@@ -25,7 +27,12 @@ export default function Navbar() {
       }}
     >
       {/* Inicio */}
-      <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 20px", textDecoration: "none" }}>
+      <Link
+        href="/"
+        aria-label="Inicio"
+        aria-current={pathname === "/" ? "page" : undefined}
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 20px", textDecoration: "none", transition: "opacity 0.15s", touchAction: "manipulation" }}
+      >
         <div style={{
           width: 44,
           height: 44,
@@ -40,10 +47,15 @@ export default function Navbar() {
             <path d="M3 12L12 3l9 9" /><path d="M9 21V12h6v9" />
           </svg>
         </div>
+        <span style={{ fontSize: "0.6rem", fontWeight: 600, color: pathname === "/" ? "#c5f135" : "rgba(255,255,255,0.3)", letterSpacing: "0.02em" }}>Inicio</span>
       </Link>
 
       {/* + Nuevo evento — acción principal */}
-      <Link href="/nuevo-evento" style={{ display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
+      <Link
+        href="/nuevo-evento"
+        aria-label="Nuevo evento"
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "4px 20px", textDecoration: "none", transition: "opacity 0.15s, transform 0.12s", touchAction: "manipulation" }}
+      >
         <div style={{
           width: 52,
           height: 52,
@@ -53,15 +65,22 @@ export default function Navbar() {
           alignItems: "center",
           justifyContent: "center",
           boxShadow: "0 0 0 6px rgba(197,241,53,0.12)",
+          transition: "transform 0.12s ease, box-shadow 0.12s ease",
         }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </div>
+        <span style={{ fontSize: "0.6rem", fontWeight: 600, color: "rgba(255,255,255,0.3)", letterSpacing: "0.02em" }}>Nuevo</span>
       </Link>
 
       {/* Proyectos */}
-      <Link href="/proyectos" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 20px", textDecoration: "none" }}>
+      <Link
+        href="/proyectos"
+        aria-label="Proyectos"
+        aria-current={pathname === "/proyectos" ? "page" : undefined}
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 20px", textDecoration: "none", transition: "opacity 0.15s", touchAction: "manipulation" }}
+      >
         <div style={{
           width: 44,
           height: 44,
@@ -77,6 +96,7 @@ export default function Navbar() {
             <rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" />
           </svg>
         </div>
+        <span style={{ fontSize: "0.6rem", fontWeight: 600, color: pathname === "/proyectos" ? "#c5f135" : "rgba(255,255,255,0.3)", letterSpacing: "0.02em" }}>Proyectos</span>
       </Link>
     </nav>
   );

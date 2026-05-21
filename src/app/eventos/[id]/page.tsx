@@ -27,87 +27,104 @@ export default async function EventoDetalle({
 
   if (!evento) notFound();
 
-  const estadoConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
-    ACTIVO:     { label: "Activo",     color: "#10b981", bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.25)" },
-    PENDIENTE:  { label: "Pendiente",  color: "#f59e0b", bg: "rgba(245,158,11,0.15)", border: "rgba(245,158,11,0.25)" },
-    COMPLETADO: { label: "Completado", color: "#8b5cf6", bg: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.25)" },
+  const estadoConfig: Record<string, { label: string; color: string; bg: string }> = {
+    ACTIVO:     { label: "Activo",     color: "#c5f135",             bg: "rgba(197,241,53,0.12)" },
+    PENDIENTE:  { label: "Pendiente",  color: "#f59e0b",             bg: "rgba(245,158,11,0.12)" },
+    COMPLETADO: { label: "Completado", color: "rgba(255,255,255,0.4)", bg: "rgba(255,255,255,0.06)" },
   };
   const est = estadoConfig[evento.estado] ?? estadoConfig.PENDIENTE;
 
   return (
     <>
-      <main className="has-bottom-nav min-h-dvh" style={{ background: "var(--bg)" }}>
+      <main style={{ background: "#000", minHeight: "100dvh" }}>
 
         {/* Header */}
-        <header
-          className="sticky top-0 z-40 px-5 py-4 flex items-center gap-3"
-          style={{
-            background: "rgba(9,9,15,0.85)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <Link href="/" style={{ color: "var(--text-2)" }}>
+        <header className="safe-header" style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 40,
+          background: "rgba(0,0,0,0.9)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}>
+          <Link href="/" aria-label="Volver al inicio" style={{ color: "rgba(255,255,255,0.5)", display: "flex", alignItems: "center", padding: 10, margin: -10 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M19 12H5M12 5l-7 7 7 7" />
             </svg>
           </Link>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-3)" }}>
-            <Link href={`/proyectos/${evento.proyecto.id}`} className="hover:text-slate-300 transition-colors">
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.78rem", color: "rgba(255,255,255,0.3)" }}>
+            <Link href={`/proyectos/${evento.proyecto.id}`} style={{ color: "inherit", textDecoration: "none" }}>
               {evento.proyecto.nombre}
             </Link>
             <span>/</span>
-            <span style={{ color: "var(--text-2)" }}>{evento.nombre}</span>
+            <span style={{ color: "rgba(255,255,255,0.6)" }}>{evento.nombre}</span>
           </div>
         </header>
 
-        <div className="px-5 py-6 space-y-4">
+        <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
 
           {/* Event card */}
-          <div
-            className="card p-5"
-            style={{ borderLeft: `3px solid ${evento.proyecto.color}` }}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span
-                    className="badge"
-                    style={{ background: `${evento.proyecto.color}18`, color: evento.proyecto.color, border: `1px solid ${evento.proyecto.color}33` }}
-                  >
+          <div style={{
+            background: "#141414",
+            borderRadius: 20,
+            padding: "20px",
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                  <span style={{
+                    display: "inline-block",
+                    padding: "3px 12px",
+                    borderRadius: 999,
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    background: `${evento.proyecto.color}18`,
+                    color: evento.proyecto.color,
+                    border: `1px solid ${evento.proyecto.color}33`,
+                  }}>
                     {evento.proyecto.nombre}
                   </span>
-                  <span
-                    className="badge"
-                    style={{ background: est.bg, color: est.color, border: `1px solid ${est.border}` }}
-                  >
+                  <span style={{
+                    display: "inline-block",
+                    padding: "3px 12px",
+                    borderRadius: 999,
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    background: est.bg,
+                    color: est.color,
+                  }}>
                     {est.label}
                   </span>
                 </div>
-                <h1 style={{ color: "var(--text-1)", fontWeight: 700, fontSize: "1.25rem" }}>
-                  {evento.nombre}
-                </h1>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontSize: "1.8rem", lineHeight: 1 }}>{evento.icono}</span>
+                  <h1 style={{ color: "#fff", fontWeight: 700, fontSize: "1.2rem", letterSpacing: "-0.02em" }}>
+                    {evento.nombre}
+                  </h1>
+                </div>
                 {evento.descripcion && (
-                  <p style={{ color: "var(--text-2)", fontSize: "0.85rem", marginTop: 4 }}>
+                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", marginBottom: 4 }}>
                     {evento.descripcion}
                   </p>
                 )}
-                <p style={{ color: "var(--text-3)", fontSize: "0.78rem", marginTop: 6 }}>
+                <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.78rem", marginBottom: 12 }}>
                   {formatFecha(evento.fechaInicio)} · {formatHora(evento.fechaInicio)} — {formatHora(evento.fechaFin)}
                 </p>
-                <div className="mt-3">
-                  <GoogleCalendarButton
-                    evento={{
-                      nombre: evento.nombre,
-                      descripcion: evento.descripcion,
-                      fechaInicio: evento.fechaInicio,
-                      fechaFin: evento.fechaFin,
-                      recurrencia: evento.recurrencia,
-                      reglaRecurrencia: evento.reglaRecurrencia,
-                    }}
-                  />
-                </div>
+                <GoogleCalendarButton
+                  evento={{
+                    nombre: evento.nombre,
+                    descripcion: evento.descripcion,
+                    fechaInicio: evento.fechaInicio,
+                    fechaFin: evento.fechaFin,
+                    recurrencia: evento.recurrencia,
+                    reglaRecurrencia: evento.reglaRecurrencia,
+                  }}
+                />
               </div>
               <EventoAcciones evento={{ id: evento.id, estado: evento.estado }} />
             </div>
@@ -115,9 +132,24 @@ export default async function EventoDetalle({
             {evento.estado === "ACTIVO" && (
               <Link
                 href={`/eventos/${evento.id}/sesion`}
-                className="btn-purple mt-4 flex items-center justify-center gap-2 w-full py-3 text-sm"
+                className="tappable"
+                style={{
+                  marginTop: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  background: "#c5f135",
+                  color: "#000",
+                  borderRadius: 14,
+                  padding: "14px",
+                  minHeight: 44,
+                  fontWeight: 800,
+                  fontSize: "0.9rem",
+                  textDecoration: "none",
+                }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21" /></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21" /></svg>
                 Abrir sesión activa
               </Link>
             )}

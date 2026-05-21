@@ -2,44 +2,92 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import EmojiPicker from "@/components/EmojiPicker";
 
 const CATEGORIAS = [
   { value: "REUNION", label: "Reunión" },
-  { value: "SESION", label: "Sesión" },
-  { value: "TALLER", label: "Taller" },
-  { value: "OTRO", label: "Otro" },
+  { value: "SESION",  label: "Sesión"  },
+  { value: "TALLER",  label: "Taller"  },
+  { value: "OTRO",    label: "Otro"    },
 ];
 
 const DIAS_SEMANA = [
-  { value: 1, label: "L", nombre: "Lunes" },
-  { value: 2, label: "M", nombre: "Martes" },
+  { value: 1, label: "L", nombre: "Lunes"     },
+  { value: 2, label: "M", nombre: "Martes"    },
   { value: 3, label: "X", nombre: "Miércoles" },
-  { value: 4, label: "J", nombre: "Jueves" },
-  { value: 5, label: "V", nombre: "Viernes" },
-  { value: 6, label: "S", nombre: "Sábado" },
-  { value: 0, label: "D", nombre: "Domingo" },
+  { value: 4, label: "J", nombre: "Jueves"    },
+  { value: 5, label: "V", nombre: "Viernes"   },
+  { value: 6, label: "S", nombre: "Sábado"    },
+  { value: 0, label: "D", nombre: "Domingo"   },
 ];
 
 const OPCIONES_RECURRENCIA = [
-  { value: "NINGUNA", label: "No se repite" },
-  { value: "DIARIA", label: "Cada día" },
-  { value: "SEMANAL", label: "Cada semana" },
-  { value: "MENSUAL", label: "Cada mes" },
-  { value: "PERSONALIZADA", label: "Personalizado" },
+  { value: "NINGUNA",      label: "No se repite" },
+  { value: "DIARIA",       label: "Cada día"     },
+  { value: "SEMANAL",      label: "Cada semana"  },
+  { value: "MENSUAL",      label: "Cada mes"     },
+  { value: "PERSONALIZADA",label: "Personalizado"},
 ];
 
 const INTERVALOS_NOTIF = [
-  { value: 10, label: "Cada 10 min" },
-  { value: 15, label: "Cada 15 min" },
-  { value: 20, label: "Cada 20 min" },
-  { value: 30, label: "Cada 30 min" },
-  { value: 45, label: "Cada 45 min" },
-  { value: 60, label: "Cada hora" },
+  { value: 10, label: "10 min" },
+  { value: 15, label: "15 min" },
+  { value: 20, label: "20 min" },
+  { value: 30, label: "30 min" },
+  { value: 45, label: "45 min" },
+  { value: 60, label: "1 hora" },
 ];
 
-function css(extra = "") {
-  return `w-full px-3 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-600 outline-none focus:ring-2 focus:ring-indigo-500 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] ${extra}`;
+const INPUT: React.CSSProperties = {
+  width: "100%",
+  padding: "11px 14px",
+  borderRadius: 12,
+  background: "#1a1a1a",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#fff",
+  fontSize: "0.9rem",
+  outline: "none",
+};
+
+const LABEL: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.72rem",
+  fontWeight: 600,
+  color: "rgba(255,255,255,0.4)",
+  marginBottom: 10,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+};
+
+const SECTION: React.CSSProperties = {
+  background: "#141414",
+  borderRadius: 20,
+  padding: "20px",
+};
+
+function pill(active: boolean): React.CSSProperties {
+  return {
+    padding: "7px 14px",
+    borderRadius: 999,
+    fontSize: "0.78rem",
+    fontWeight: 700,
+    border: active ? "none" : "1px solid rgba(255,255,255,0.08)",
+    background: active ? "#c5f135" : "rgba(255,255,255,0.05)",
+    color: active ? "#000" : "rgba(255,255,255,0.5)",
+    cursor: "pointer",
+  };
+}
+
+function dayBtn(active: boolean): React.CSSProperties {
+  return {
+    width: 38, height: 38, borderRadius: "50%",
+    border: active ? "none" : "1px solid rgba(255,255,255,0.1)",
+    background: active ? "#c5f135" : "rgba(255,255,255,0.05)",
+    color: active ? "#000" : "rgba(255,255,255,0.5)",
+    fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+  };
 }
 
 type ReglaRecurrencia = {
@@ -51,24 +99,14 @@ type ReglaRecurrencia = {
 };
 
 type Evento = {
-  id: string;
-  nombre: string;
-  descripcion: string | null;
-  fechaInicio: string;
-  fechaFin: string;
-  categoria: string;
-  recurrencia: string;
-  reglaRecurrencia: ReglaRecurrencia | null;
-  intervaloNotificacion: number;
-  eventoOriginalId: string | null;
+  id: string; nombre: string; descripcion: string | null;
+  fechaInicio: string; fechaFin: string; categoria: string;
+  recurrencia: string; reglaRecurrencia: ReglaRecurrencia | null;
+  intervaloNotificacion: number; eventoOriginalId: string | null;
   proyecto: { id: string; nombre: string };
 };
 
-export default function EditarEvento({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EditarEvento({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
 
@@ -86,6 +124,7 @@ export default function EditarEvento({
   const [fechaFinSerie, setFechaFinSerie] = useState("");
   const [ocurrencias, setOcurrencias] = useState(10);
   const [intervaloNotif, setIntervaloNotif] = useState(15);
+  const [icono, setIcono] = useState("📅");
   const [alcance, setAlcance] = useState<"solo" | "futuros">("solo");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
@@ -105,6 +144,7 @@ export default function EditarEvento({
         setCategoria(ev.categoria);
         setRecurrencia(ev.recurrencia);
         setIntervaloNotif(ev.intervaloNotificacion ?? 15);
+        setIcono((ev as { icono?: string }).icono ?? "📅");
         if (ev.reglaRecurrencia) {
           setIntervalo(ev.reglaRecurrencia.intervalo ?? 1);
           setDiasSemana(ev.reglaRecurrencia.diasSemana ?? []);
@@ -116,9 +156,7 @@ export default function EditarEvento({
   }, [id]);
 
   const toggleDia = (dia: number) =>
-    setDiasSemana((prev) =>
-      prev.includes(dia) ? prev.filter((d) => d !== dia) : [...prev, dia]
-    );
+    setDiasSemana((prev) => prev.includes(dia) ? prev.filter((d) => d !== dia) : [...prev, dia]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,341 +166,227 @@ export default function EditarEvento({
 
     const fechaInicio = `${fecha}T${horaInicio}:00`;
     const fechaFin = `${fecha}T${horaFin}:00`;
-
-    const reglaRecurrencia =
-      recurrencia !== "NINGUNA"
-        ? {
-            intervalo,
-            diasSemana:
-              recurrencia === "SEMANAL" || recurrencia === "PERSONALIZADA"
-                ? diasSemana
-                : undefined,
-            terminaCon,
-            fechaFin: terminaCon === "fecha" ? (fechaFinSerie || undefined) : undefined,
-            ocurrencias: terminaCon === "ocurrencias" ? ocurrencias : undefined,
-          }
-        : null;
+    const reglaRecurrencia = recurrencia !== "NINGUNA" ? {
+      intervalo,
+      diasSemana: (recurrencia === "SEMANAL" || recurrencia === "PERSONALIZADA") ? diasSemana : undefined,
+      terminaCon,
+      fechaFin: terminaCon === "fecha" ? (fechaFinSerie || undefined) : undefined,
+      ocurrencias: terminaCon === "ocurrencias" ? ocurrencias : undefined,
+    } : null;
 
     setCargando(true);
-
-    // Editar este evento
     const res = await fetch(`/api/eventos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre,
-        descripcion,
-        fechaInicio,
-        fechaFin,
-        categoria,
-        recurrencia,
-        reglaRecurrencia,
-        intervaloNotificacion: intervaloNotif,
-      }),
+      body: JSON.stringify({ nombre, descripcion, icono, fechaInicio, fechaFin, categoria, recurrencia, reglaRecurrencia, intervaloNotificacion: intervaloNotif }),
     });
 
-    if (!res.ok) {
-      setError("Error al guardar.");
-      setCargando(false);
-      return;
-    }
+    if (!res.ok) { setError("Error al guardar."); setCargando(false); return; }
 
-    // Si tiene serie y eligió editar futuros, actualizar los siguientes
     if (alcance === "futuros" && evento?.eventoOriginalId) {
       await fetch(`/api/eventos/${id}/editar-futuros`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre,
-          descripcion,
-          horaInicio,
-          horaFin,
-          categoria,
-          intervaloNotificacion: intervaloNotif,
-        }),
+        body: JSON.stringify({ nombre, descripcion, horaInicio, horaFin, categoria, intervaloNotificacion: intervaloNotif }),
       });
     }
 
     router.push(`/eventos/${id}`);
   };
 
-  if (!evento) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center text-slate-500">
-          Cargando...
-        </div>
-      </>
-    );
-  }
+  if (!evento) return (
+    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
+      <p style={{ color: "rgba(255,255,255,0.3)" }}>Cargando...</p>
+    </div>
+  );
 
   const esSerie = !!evento.eventoOriginalId || evento.recurrencia !== "NINGUNA";
   const mostrarDias = recurrencia === "SEMANAL" || recurrencia === "PERSONALIZADA";
 
   return (
     <>
-      <Navbar />
-      <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-200 mb-6">Editar evento</h1>
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <main style={{ background: "#000", minHeight: "100dvh" }}>
 
-          {/* Info básica */}
-          <div className="card p-4 space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Nombre</label>
-              <input
-                type="text"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                className={css()}
-                autoFocus
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Descripción <span className="text-slate-600">(opcional)</span>
-              </label>
-              <textarea
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                rows={2}
-                className={css("resize-none")}
-              />
-            </div>
-          </div>
+        {/* Header */}
+        <header className="safe-header" style={{
+          position: "sticky", top: 0, zIndex: 40,
+          background: "rgba(0,0,0,0.9)",
+          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          display: "flex", alignItems: "center", gap: 12,
+        }}>
+          <Link href={`/eventos/${id}`} aria-label="Volver al evento" style={{ color: "rgba(255,255,255,0.5)", display: "flex", alignItems: "center", padding: 10, margin: -10 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+          </Link>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.95rem" }}>Editar evento</span>
+        </header>
 
-          {/* Fecha y hora */}
-          <div className="card p-4 space-y-3">
-            <p className="text-xs font-medium text-slate-400">Fecha y hora</p>
-            <input
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-              className={css()}
-            />
-            <div className="flex items-center gap-2">
-              <input
-                type="time"
-                value={horaInicio}
-                onChange={(e) => setHoraInicio(e.target.value)}
-                className={css("flex-1")}
-              />
-              <span className="text-slate-500 text-sm">→</span>
-              <input
-                type="time"
-                value={horaFin}
-                onChange={(e) => setHoraFin(e.target.value)}
-                className={css("flex-1")}
-              />
-            </div>
-          </div>
+        <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-          {/* Recurrencia */}
-          <div className="card p-4 space-y-4">
-            <p className="text-xs font-medium text-slate-400">Repetición</p>
-            <div className="flex flex-wrap gap-2">
-              {OPCIONES_RECURRENCIA.map((op) => (
-                <button
-                  key={op.value}
-                  type="button"
-                  onClick={() => setRecurrencia(op.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    recurrencia === op.value
-                      ? "bg-indigo-600 text-white"
-                      : "text-slate-400 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] hover:text-slate-200"
-                  }`}
-                >
-                  {op.label}
-                </button>
-              ))}
-            </div>
-
-            {mostrarDias && (
+            {/* Info básica */}
+            <div style={SECTION}>
+              <div style={{ marginBottom: 16 }}>
+                <EmojiPicker value={icono} onChange={setIcono} />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={LABEL}>Nombre</label>
+                <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} style={INPUT} autoFocus />
+              </div>
               <div>
-                <p className="text-xs text-slate-500 mb-2">Repetir los días</p>
-                <div className="flex gap-1.5">
-                  {DIAS_SEMANA.map((d) => (
-                    <button
-                      key={d.value}
-                      type="button"
-                      onClick={() => toggleDia(d.value)}
-                      title={d.nombre}
-                      className={`w-9 h-9 rounded-full text-xs font-medium transition-colors ${
-                        diasSemana.includes(d.value)
-                          ? "bg-indigo-600 text-white"
-                          : "text-slate-400 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] hover:border-indigo-500"
-                      }`}
-                    >
-                      {d.label}
-                    </button>
+                <label style={LABEL}>Descripción <span style={{ opacity: 0.5, fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} style={{ ...INPUT, resize: "none" }} />
+              </div>
+            </div>
+
+            {/* Fecha y hora */}
+            <div style={SECTION}>
+              <label style={LABEL}>Fecha y hora</label>
+              <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} style={{ ...INPUT, marginBottom: 10 }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <input type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} style={{ ...INPUT, flex: 1 }} />
+                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1rem" }}>→</span>
+                <input type="time" value={horaFin} onChange={(e) => setHoraFin(e.target.value)} style={{ ...INPUT, flex: 1 }} />
+              </div>
+            </div>
+
+            {/* Repetición */}
+            <div style={SECTION}>
+              <label style={LABEL}>Repetición</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                {OPCIONES_RECURRENCIA.map((op) => (
+                  <button key={op.value} type="button" onClick={() => setRecurrencia(op.value)} style={pill(recurrencia === op.value)}>
+                    {op.label}
+                  </button>
+                ))}
+              </div>
+
+              {mostrarDias && (
+                <div style={{ marginBottom: 16 }}>
+                  <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>Repetir los días</p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {DIAS_SEMANA.map((d) => (
+                      <button key={d.value} type="button" onClick={() => toggleDia(d.value)} title={d.nombre} style={dayBtn(diasSemana.includes(d.value))}>
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {recurrencia === "PERSONALIZADA" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                  <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>Cada</span>
+                  <input type="number" min={1} max={52} value={intervalo} onChange={(e) => setIntervalo(Number(e.target.value))} style={{ ...INPUT, width: 64 }} />
+                  <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>semana(s)</span>
+                </div>
+              )}
+
+              {recurrencia !== "NINGUNA" && (
+                <div>
+                  <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>Termina</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                      <input type="radio" name="terminaCon" checked={terminaCon === "fecha"} onChange={() => setTerminaCon("fecha")} style={{ accentColor: "#c5f135" }} />
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.88rem" }}>En fecha</span>
+                    </label>
+                    {terminaCon === "fecha" && (
+                      <input type="date" value={fechaFinSerie} onChange={(e) => setFechaFinSerie(e.target.value)} style={{ ...INPUT, marginLeft: 20 }} />
+                    )}
+                    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", flexWrap: "wrap" }}>
+                      <input type="radio" name="terminaCon" checked={terminaCon === "ocurrencias"} onChange={() => setTerminaCon("ocurrencias")} style={{ accentColor: "#c5f135" }} />
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.88rem" }}>Después de</span>
+                      <input type="number" min={1} max={200} value={ocurrencias} onChange={(e) => setOcurrencias(Number(e.target.value))} onClick={() => setTerminaCon("ocurrencias")} style={{ ...INPUT, width: 60, textAlign: "center" }} />
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.88rem" }}>sesiones</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Categoría */}
+            <div style={SECTION}>
+              <label style={LABEL}>Categoría</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {CATEGORIAS.map((c) => (
+                  <button key={c.value} type="button" onClick={() => setCategoria(c.value)} style={pill(categoria === c.value)}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Recordatorio */}
+            <div style={SECTION}>
+              <label style={LABEL}>Recordatorio</label>
+              <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>
+                Frecuencia de notificaciones push durante la sesión
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {INTERVALOS_NOTIF.map((op) => (
+                  <button key={op.value} type="button" onClick={() => setIntervaloNotif(op.value)} style={pill(intervaloNotif === op.value)}>
+                    {op.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Alcance para series */}
+            {esSerie && (
+              <div style={SECTION}>
+                <label style={LABEL}>¿Qué quieres editar?</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {[
+                    { value: "solo",    label: "Solo este evento"               },
+                    { value: "futuros", label: "Este y todos los siguientes"    },
+                  ].map((op) => (
+                    <label key={op.value} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                      <input
+                        type="radio" name="alcance" value={op.value}
+                        checked={alcance === op.value}
+                        onChange={() => setAlcance(op.value as "solo" | "futuros")}
+                        style={{ accentColor: "#c5f135" }}
+                      />
+                      <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>{op.label}</span>
+                    </label>
                   ))}
                 </div>
               </div>
             )}
 
-            {recurrencia !== "NINGUNA" && (
-              <>
-                {recurrencia === "PERSONALIZADA" && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-400">Cada</span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={52}
-                      value={intervalo}
-                      onChange={(e) => setIntervalo(Number(e.target.value))}
-                      className="w-16 px-2 py-1.5 rounded-lg text-sm text-slate-200 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-slate-400">semana(s)</span>
-                  </div>
-                )}
-                <div className="space-y-3">
-                  <p className="text-xs text-slate-400">Termina</p>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="terminaCon"
-                        checked={terminaCon === "fecha"}
-                        onChange={() => setTerminaCon("fecha")}
-                        className="accent-indigo-500"
-                      />
-                      <span className="text-sm text-slate-300">En fecha</span>
-                    </label>
-                    {terminaCon === "fecha" && (
-                      <input
-                        type="date"
-                        value={fechaFinSerie}
-                        onChange={(e) => setFechaFinSerie(e.target.value)}
-                        className={css("ml-6")}
-                      />
-                    )}
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="terminaCon"
-                        checked={terminaCon === "ocurrencias"}
-                        onChange={() => setTerminaCon("ocurrencias")}
-                        className="accent-indigo-500"
-                      />
-                      <span className="text-sm text-slate-300">Después de</span>
-                      <input
-                        type="number"
-                        min={1}
-                        max={200}
-                        value={ocurrencias}
-                        onChange={(e) => setOcurrencias(Number(e.target.value))}
-                        onClick={() => setTerminaCon("ocurrencias")}
-                        className="w-16 px-2 py-1 rounded-lg text-sm text-center text-slate-200 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-slate-300">sesiones</span>
-                    </label>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+            {error && <p style={{ color: "#ef4444", fontSize: "0.83rem", padding: "0 4px" }}>{error}</p>}
 
-          {/* Categoría */}
-          <div className="card p-4">
-            <p className="text-xs font-medium text-slate-400 mb-2">Categoría</p>
-            <div className="flex gap-2 flex-wrap">
-              {CATEGORIAS.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setCategoria(c.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    categoria === c.value
-                      ? "bg-indigo-600 text-white"
-                      : "text-slate-400 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] hover:text-slate-200"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
+            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+              <button
+                type="button"
+                onClick={() => router.back()}
+                style={{
+                  flex: 1, padding: "13px", borderRadius: 14,
+                  background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.45)", fontSize: "0.9rem", fontWeight: 600, cursor: "pointer",
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={cargando}
+                style={{
+                  flex: 1, padding: "13px", borderRadius: 14,
+                  background: "#c5f135", color: "#000", border: "none",
+                  fontSize: "0.9rem", fontWeight: 800, cursor: "pointer",
+                  opacity: cargando ? 0.6 : 1,
+                }}
+              >
+                {cargando ? "Guardando..." : "Guardar cambios"}
+              </button>
             </div>
-          </div>
-
-          {/* Intervalo de notificaciones */}
-          <div className="card p-4">
-            <p className="text-xs font-medium text-slate-400 mb-1">
-              Recordatorio en celular
-            </p>
-            <p className="text-xs text-slate-600 mb-3">
-              Frecuencia de notificaciones push durante la sesión
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {INTERVALOS_NOTIF.map((op) => (
-                <button
-                  key={op.value}
-                  type="button"
-                  onClick={() => setIntervaloNotif(op.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    intervaloNotif === op.value
-                      ? "bg-indigo-600 text-white"
-                      : "text-slate-400 bg-[var(--kairos-dark)] border border-[var(--kairos-border)] hover:text-slate-200"
-                  }`}
-                >
-                  {op.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Alcance para series */}
-          {esSerie && (
-            <div className="card p-4">
-              <p className="text-xs font-medium text-slate-400 mb-3">
-                ¿Qué quieres editar?
-              </p>
-              <div className="space-y-2">
-                {[
-                  { value: "solo", label: "Solo este evento" },
-                  { value: "futuros", label: "Este y todos los siguientes" },
-                ].map((op) => (
-                  <label
-                    key={op.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="alcance"
-                      value={op.value}
-                      checked={alcance === op.value}
-                      onChange={() =>
-                        setAlcance(op.value as "solo" | "futuros")
-                      }
-                      className="accent-indigo-500"
-                    />
-                    <span className="text-sm text-slate-300">{op.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {error && <p className="text-sm text-red-400 px-1">{error}</p>}
-
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="flex-1 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 transition-colors border border-[var(--kairos-border)]"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={cargando}
-              className="flex-1 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors disabled:opacity-50"
-            >
-              {cargando ? "Guardando..." : "Guardar cambios"}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </main>
+      <Navbar />
     </>
   );
 }

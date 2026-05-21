@@ -12,51 +12,111 @@ export default async function Proyectos() {
 
   return (
     <>
-      <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-200">Proyectos</h1>
+      <main style={{ background: "#000", minHeight: "100dvh" }}>
+
+        {/* Header */}
+        <div style={{
+          padding: "56px 20px 20px",
+          paddingTop: "calc(56px + env(safe-area-inset-top))",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>
+            Proyectos
+          </h1>
           <Link
             href="/nuevo-proyecto"
-            className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
+            className="tappable"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 16px",
+              minHeight: 44,
+              borderRadius: 12,
+              background: "#c5f135",
+              color: "#000",
+              fontWeight: 700,
+              fontSize: "0.82rem",
+              textDecoration: "none",
+            }}
           >
-            + Nuevo proyecto
+            + Nuevo
           </Link>
         </div>
 
-        {proyectos.length === 0 ? (
-          <div className="card p-12 text-center text-slate-500">
-            <p className="text-lg mb-2">Sin proyectos todavía</p>
-            <Link href="/nuevo-proyecto" className="text-indigo-400 hover:underline text-sm">
-              Crear tu primer proyecto →
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {proyectos.map((p) => (
+        <div style={{ padding: "0 16px" }}>
+          {proyectos.length === 0 ? (
+            <div style={{ background: "#141414", borderRadius: 20, padding: "48px 20px", textAlign: "center" }}>
+              <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.88rem", marginBottom: 16 }}>
+                Sin proyectos todavía
+              </p>
               <Link
-                key={p.id}
-                href={`/proyectos/${p.id}`}
-                className="card p-5 hover:border-indigo-500/50 transition-colors"
-                style={{ borderLeft: `4px solid ${p.color}` }}
+                href="/nuevo-proyecto"
+                style={{
+                  display: "inline-block",
+                  padding: "10px 22px",
+                  borderRadius: 12,
+                  background: "#c5f135",
+                  color: "#000",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  textDecoration: "none",
+                }}
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="font-semibold text-slate-200 text-lg">{p.nombre}</h2>
-                    <p className="text-sm text-slate-500 mt-1">
+                + Crear proyecto
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {proyectos.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/proyectos/${p.id}`}
+                  className="tappable"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    background: "#141414",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderLeft: `3px solid ${p.color}`,
+                    borderRadius: 18,
+                    padding: "16px 18px",
+                    textDecoration: "none",
+                  }}
+                >
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 11,
+                    background: `${p.color}18`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
+                    <div style={{ width: 9, height: 9, borderRadius: "50%", background: p.color }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: "#fff", fontWeight: 700, fontSize: "0.95rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {p.nombre}
+                    </p>
+                    <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.72rem", marginTop: 2 }}>
                       {p._count.eventos} evento{p._count.eventos !== 1 ? "s" : ""}
                     </p>
                   </div>
-                  <div
-                    className="w-4 h-4 rounded-full mt-1"
-                    style={{ backgroundColor: p.color }}
-                  />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
+      <Navbar />
     </>
   );
 }

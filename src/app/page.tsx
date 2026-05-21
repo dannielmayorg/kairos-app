@@ -34,7 +34,7 @@ export default async function Dashboard() {
   return (
     <>
       <PushSubscriber />
-      <main className="has-bottom-nav" style={{ background: "#000", minHeight: "100dvh" }}>
+      <main style={{ background: "#000", minHeight: "100dvh" }}>
 
         {/* ── Header ──────────────────────────── */}
         <div style={{
@@ -71,7 +71,7 @@ export default async function Dashboard() {
 
         {/* ── Stats pills ──────────────────────── */}
         <div style={{ padding: "0 20px 24px", display: "flex", gap: 8 }}>
-          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#c5f135" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: "#fff" }}>
+          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#c5f135" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: eventosActivos.length > 0 ? "#000" : "#fff" }}>
             {eventosActivos.length} activo{eventosActivos.length !== 1 ? "s" : ""}
           </div>
           <div style={{ padding: "7px 14px", borderRadius: 999, background: "#1c1c1c", fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>
@@ -93,6 +93,7 @@ export default async function Dashboard() {
               <Link
                 key={evento.id}
                 href={`/eventos/${evento.id}/sesion`}
+                className="tappable"
                 style={{
                   display: "block",
                   background: "#c5f135",
@@ -133,6 +134,9 @@ export default async function Dashboard() {
                   </div>
                 </div>
 
+                <p style={{ fontSize: "2rem", marginBottom: 8, position: "relative", lineHeight: 1 }}>
+                  {(evento as { icono?: string }).icono ?? "📅"}
+                </p>
                 <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000", letterSpacing: "-0.02em", marginBottom: 4, position: "relative" }}>
                   {evento.nombre}
                 </p>
@@ -191,7 +195,7 @@ export default async function Dashboard() {
                   padding: "10px 22px",
                   borderRadius: 12,
                   background: "#c5f135",
-                  color: "#fff",
+                  color: "#000",
                   fontWeight: 700,
                   fontSize: "0.85rem",
                   textDecoration: "none",
@@ -205,6 +209,7 @@ export default async function Dashboard() {
                   <Link
                     key={evento.id}
                     href={`/eventos/${evento.id}`}
+                    className="tappable"
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -218,13 +223,14 @@ export default async function Dashboard() {
                       width: 40,
                       height: 40,
                       borderRadius: 13,
-                      background: `${evento.proyecto.color}20`,
+                      background: "#1c1c1c",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
+                      fontSize: "1.2rem",
                     }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: evento.proyecto.color }} />
+                      {(evento as { icono?: string }).icono ?? "📅"}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ color: "#fff", fontWeight: 600, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -253,7 +259,7 @@ export default async function Dashboard() {
                   padding: "10px 22px",
                   borderRadius: 12,
                   background: "#c5f135",
-                  color: "#fff",
+                  color: "#000",
                   fontWeight: 700,
                   fontSize: "0.85rem",
                   textDecoration: "none",
@@ -267,11 +273,11 @@ export default async function Dashboard() {
                   <Link
                     key={p.id}
                     href={`/proyectos/${p.id}`}
+                    className="tappable"
                     style={{
                       display: "block",
                       background: "#141414",
-                      border: `1px solid ${p.color}30`,
-                      borderTop: `2px solid ${p.color}`,
+                      border: "1px solid rgba(255,255,255,0.06)",
                       borderRadius: 18,
                       padding: "16px 14px",
                       textDecoration: "none",

@@ -47,14 +47,7 @@ export default async function Dashboard() {
           <div style={{ padding: "48px 24px 36px" }}>
 
             {/* Greeting */}
-            <p style={{
-              fontSize: "0.7rem",
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.55)",
-              marginBottom: 6,
-            }}>
+            <p className="greeting-label" style={{ marginBottom: 6 }}>
               {saludo}
             </p>
 
@@ -109,15 +102,7 @@ export default async function Dashboard() {
           {/* Sesiones activas */}
           {eventosActivos.length > 0 && (
             <section>
-              <p style={{
-                fontSize: "0.62rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.3)",
-                marginBottom: 12,
-                paddingLeft: 4,
-              }}>
+              <p className="section-title" style={{ marginBottom: 12, paddingLeft: 4 }}>
                 En sesión ahora
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -192,13 +177,7 @@ export default async function Dashboard() {
           {/* Próximos eventos */}
           <section>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingLeft: 4 }}>
-              <p style={{
-                fontSize: "0.62rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.3)",
-              }}>
+              <p className="section-title">
                 Próximos eventos
               </p>
               <Link href="/proyectos" style={{ color: "#8b5cf6", fontSize: "0.75rem", fontWeight: 600, textDecoration: "none" }}>
@@ -280,15 +259,7 @@ export default async function Dashboard() {
 
           {/* Proyectos */}
           <section>
-            <p style={{
-              fontSize: "0.62rem",
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.3)",
-              marginBottom: 12,
-              paddingLeft: 4,
-            }}>
+            <p className="section-title" style={{ marginBottom: 12, paddingLeft: 4 }}>
               Proyectos
             </p>
 

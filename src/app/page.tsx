@@ -46,9 +46,12 @@ export default async function Dashboard() {
         }}>
           <div>
             <p className="greeting-label" style={{ marginBottom: 4 }}>{saludo}</p>
-            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: 3 }}>
               K.A.I.R.O.S.
             </h1>
+            <p style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.25)", fontWeight: 500, letterSpacing: "0.01em" }}>
+              Kind of An Intelligent Reminder, Obviously Superior
+            </p>
           </div>
           <Link href="/nuevo-proyecto" style={{
             width: 40,

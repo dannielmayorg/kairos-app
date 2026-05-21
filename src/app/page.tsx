@@ -17,10 +17,7 @@ export default async function Dashboard() {
     }),
     prisma.evento.findMany({
       where: { estado: "ACTIVO" },
-      include: {
-        proyecto: { select: { nombre: true, color: true } },
-        tareas: true,
-      },
+      include: { proyecto: { select: { nombre: true, color: true } }, tareas: true },
       orderBy: { fechaInicio: "asc" },
     }),
     prisma.evento.findMany({
@@ -37,182 +34,171 @@ export default async function Dashboard() {
   return (
     <>
       <PushSubscriber />
-      <main className="has-bottom-nav min-h-dvh" style={{ background: "#09090f" }}>
+      <main className="has-bottom-nav" style={{ background: "#000", minHeight: "100dvh" }}>
 
-        {/* ── HERO — gradiente púrpura real ────────── */}
+        {/* ── Header ──────────────────────────── */}
         <div style={{
-          background: "linear-gradient(170deg, #6d28d9 0%, #4c1d95 35%, #1e1045 65%, #09090f 100%)",
-          paddingTop: "env(safe-area-inset-top)",
+          padding: "56px 20px 20px",
+          paddingTop: "calc(56px + env(safe-area-inset-top))",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}>
-          <div style={{ padding: "48px 24px 36px" }}>
-
-            {/* Greeting */}
-            <p className="greeting-label" style={{ marginBottom: 6 }}>
-              {saludo}
-            </p>
-
-            {/* App name */}
-            <h1 style={{
-              fontSize: "2.6rem",
-              fontWeight: 800,
-              color: "#fff",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
-              marginBottom: 4,
-            }}>
+          <div>
+            <p className="greeting-label" style={{ marginBottom: 4 }}>{saludo}</p>
+            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.03em", lineHeight: 1 }}>
               K.A.I.R.O.S.
             </h1>
+          </div>
+          <Link href="/nuevo-proyecto" style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            background: "#1c1c1c",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textDecoration: "none",
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </Link>
+        </div>
 
-            <p style={{
-              fontSize: "0.78rem",
-              color: "rgba(255,255,255,0.45)",
-              marginBottom: 28,
-            }}>
-              Kind of An Intelligent Reminder, Obviously Superior
-            </p>
-
-            {/* Stats row */}
-            <div style={{ display: "flex", gap: 10 }}>
-              {[
-                { label: eventosActivos.length === 1 ? "1 activo" : `${eventosActivos.length} activos`, highlight: eventosActivos.length > 0 },
-                { label: `${eventosPendientes.length} próximos`, highlight: false },
-                { label: `${proyectos.length} proyectos`, highlight: false },
-              ].map((s) => (
-                <div key={s.label} style={{
-                  padding: "5px 14px",
-                  borderRadius: 999,
-                  fontSize: "0.72rem",
-                  fontWeight: 600,
-                  background: s.highlight ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)",
-                  border: s.highlight ? "1px solid rgba(255,255,255,0.35)" : "1px solid rgba(255,255,255,0.15)",
-                  color: "#fff",
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                }}>
-                  {s.label}
-                </div>
-              ))}
-            </div>
+        {/* ── Stats pills ──────────────────────── */}
+        <div style={{ padding: "0 20px 24px", display: "flex", gap: 8 }}>
+          <div style={{ padding: "7px 14px", borderRadius: 999, background: eventosActivos.length > 0 ? "#8b5cf6" : "#1c1c1c", fontSize: "0.78rem", fontWeight: 700, color: "#fff" }}>
+            {eventosActivos.length} activo{eventosActivos.length !== 1 ? "s" : ""}
+          </div>
+          <div style={{ padding: "7px 14px", borderRadius: 999, background: "#1c1c1c", fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>
+            {eventosPendientes.length} próximos
+          </div>
+          <div style={{ padding: "7px 14px", borderRadius: 999, background: "#1c1c1c", fontSize: "0.78rem", fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>
+            {proyectos.length} proyectos
           </div>
         </div>
 
-        {/* ── BODY — cartas sobre fondo oscuro ─────── */}
-        <div style={{ padding: "24px 16px", display: "flex", flexDirection: "column", gap: 28 }}>
+        <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 24 }}>
 
-          {/* Sesiones activas */}
-          {eventosActivos.length > 0 && (
-            <section>
-              <p className="section-title" style={{ marginBottom: 12, paddingLeft: 4 }}>
-                En sesión ahora
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {eventosActivos.map((evento) => {
-                  const pendientes = evento.tareas.filter((t) => !t.completada).length;
-                  const total = evento.tareas.length;
-                  const pct = total > 0 ? Math.round(((total - pendientes) / total) * 100) : 0;
-                  return (
-                    <Link
-                      key={evento.id}
-                      href={`/eventos/${evento.id}/sesion`}
-                      style={{
-                        display: "block",
-                        background: "linear-gradient(135deg, rgba(109,40,217,0.25) 0%, rgba(28,22,60,0.9) 100%)",
-                        border: "1px solid rgba(139,92,246,0.3)",
-                        borderLeft: `3px solid ${evento.proyecto.color}`,
-                        borderRadius: 20,
-                        padding: "16px 18px",
-                        textDecoration: "none",
-                        boxShadow: "0 8px 32px rgba(109,40,217,0.15)",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <span style={{
-                            padding: "3px 10px",
-                            borderRadius: 999,
-                            fontSize: "0.68rem",
-                            fontWeight: 600,
-                            background: `${evento.proyecto.color}22`,
-                            color: evento.proyecto.color,
-                            border: `1px solid ${evento.proyecto.color}44`,
-                          }}>
-                            {evento.proyecto.nombre}
-                          </span>
-                          <span style={{
-                            padding: "3px 10px",
-                            borderRadius: 999,
-                            fontSize: "0.68rem",
-                            fontWeight: 600,
-                            background: "rgba(16,185,129,0.15)",
-                            color: "#10b981",
-                            border: "1px solid rgba(16,185,129,0.3)",
-                          }}>
-                            Activo
-                          </span>
-                        </div>
-                        <span style={{ color: "#a78bfa", fontSize: "0.8rem", fontWeight: 600 }}>Ver →</span>
-                      </div>
-                      <p style={{ color: "#fff", fontWeight: 700, fontSize: "1.05rem", marginBottom: 4 }}>
-                        {evento.nombre}
-                      </p>
-                      <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginBottom: 12 }}>
-                        {pendientes} de {total} tareas pendientes
-                      </p>
-                      <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 999, height: 4, overflow: "hidden" }}>
-                        <div style={{
-                          height: 4,
-                          width: `${pct}%`,
-                          background: "linear-gradient(90deg, #8b5cf6, #a78bfa)",
-                          borderRadius: 999,
-                          transition: "width 0.5s ease",
-                        }} />
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          )}
+          {/* ── Sesión activa — HERO CARD ────────── */}
+          {eventosActivos.map((evento) => {
+            const pendientes = evento.tareas.filter((t) => !t.completada).length;
+            const total = evento.tareas.length;
+            const pct = total > 0 ? Math.round(((total - pendientes) / total) * 100) : 0;
+            return (
+              <Link
+                key={evento.id}
+                href={`/eventos/${evento.id}/sesion`}
+                style={{
+                  display: "block",
+                  background: "#8b5cf6",
+                  borderRadius: 24,
+                  padding: "24px",
+                  textDecoration: "none",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Decorative circle */}
+                <div style={{
+                  position: "absolute",
+                  top: -40,
+                  right: -40,
+                  width: 140,
+                  height: 140,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.08)",
+                }} />
+                <div style={{
+                  position: "absolute",
+                  bottom: -20,
+                  right: 20,
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.06)",
+                }} />
 
-          {/* Próximos eventos */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, position: "relative" }}>
+                  <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    En sesión
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.2)", borderRadius: 999, padding: "4px 12px" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80" }} />
+                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#fff" }}>Activo</span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", marginBottom: 4, position: "relative" }}>
+                  {evento.nombre}
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", marginBottom: 20, position: "relative" }}>
+                  {evento.proyecto.nombre} · {pendientes} tareas pendientes
+                </p>
+
+                {/* Progress */}
+                <div style={{ position: "relative" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)", fontWeight: 600 }}>
+                      {completadas(evento.tareas)} de {total}
+                    </span>
+                    <span style={{ fontSize: "0.72rem", color: "#fff", fontWeight: 700 }}>{pct}%</span>
+                  </div>
+                  <div className="progress-track" style={{ height: 5 }}>
+                    <div className="progress-fill" style={{ height: 5, width: `${pct}%` }} />
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div style={{
+                  marginTop: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  background: "rgba(0,0,0,0.25)",
+                  borderRadius: 14,
+                  padding: "12px",
+                  position: "relative",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21" /></svg>
+                  <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem" }}>Abrir sesión</span>
+                </div>
+              </Link>
+            );
+          })}
+
+          {/* ── Próximos eventos ─────────────────── */}
           <section>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingLeft: 4 }}>
-              <p className="section-title">
-                Próximos eventos
-              </p>
-              <Link href="/proyectos" style={{ color: "#8b5cf6", fontSize: "0.75rem", fontWeight: 600, textDecoration: "none" }}>
-                Ver todos →
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <p className="section-title">Próximos eventos</p>
+              <Link href="/proyectos" style={{ fontSize: "0.78rem", fontWeight: 600, color: "#8b5cf6", textDecoration: "none" }}>
+                Ver todos
               </Link>
             </div>
 
             {eventosPendientes.length === 0 ? (
-              <div style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: 20,
-                padding: "32px 24px",
-                textAlign: "center",
-              }}>
-                <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.9rem", marginBottom: 16 }}>
+              <div style={{ background: "#141414", borderRadius: 20, padding: "28px 20px", textAlign: "center" }}>
+                <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.88rem", marginBottom: 16 }}>
                   No hay eventos próximos
                 </p>
                 <Link href="/nuevo-evento" style={{
                   display: "inline-block",
-                  padding: "10px 20px",
+                  padding: "10px 22px",
                   borderRadius: 12,
-                  background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+                  background: "#8b5cf6",
                   color: "#fff",
+                  fontWeight: 700,
                   fontSize: "0.85rem",
-                  fontWeight: 600,
                   textDecoration: "none",
-                  boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
                 }}>
                   + Crear evento
                 </Link>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {eventosPendientes.map((evento) => (
+              <div style={{ background: "#141414", borderRadius: 20, overflow: "hidden" }}>
+                {eventosPendientes.map((evento, i) => (
                   <Link
                     key={evento.id}
                     href={`/eventos/${evento.id}`}
@@ -220,25 +206,22 @@ export default async function Dashboard() {
                       display: "flex",
                       alignItems: "center",
                       gap: 14,
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      borderRadius: 16,
                       padding: "14px 16px",
                       textDecoration: "none",
+                      borderBottom: i < eventosPendientes.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
                     }}
                   >
                     <div style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: 14,
-                      background: `${evento.proyecto.color}18`,
-                      border: `1px solid ${evento.proyecto.color}33`,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 13,
+                      background: `${evento.proyecto.color}20`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
                     }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: evento.proyecto.color }} />
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: evento.proyecto.color }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ color: "#fff", fontWeight: 600, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -248,42 +231,29 @@ export default async function Dashboard() {
                         {formatFecha(evento.fechaInicio)} · {formatHora(evento.fechaInicio)}
                       </p>
                     </div>
-                    <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.78rem", flexShrink: 0 }}>
-                      {evento.proyecto.nombre}
-                    </span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
                   </Link>
                 ))}
               </div>
             )}
           </section>
 
-          {/* Proyectos */}
-          <section>
-            <p className="section-title" style={{ marginBottom: 12, paddingLeft: 4 }}>
-              Proyectos
-            </p>
+          {/* ── Proyectos ────────────────────────── */}
+          <section style={{ paddingBottom: 8 }}>
+            <p className="section-title" style={{ marginBottom: 14 }}>Proyectos</p>
 
             {proyectos.length === 0 ? (
-              <div style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: 20,
-                padding: "32px 24px",
-                textAlign: "center",
-              }}>
-                <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.9rem", marginBottom: 16 }}>
-                  Sin proyectos aún
-                </p>
+              <div style={{ background: "#141414", borderRadius: 20, padding: "28px 20px", textAlign: "center" }}>
+                <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.88rem", marginBottom: 16 }}>Sin proyectos aún</p>
                 <Link href="/nuevo-proyecto" style={{
                   display: "inline-block",
-                  padding: "10px 20px",
+                  padding: "10px 22px",
                   borderRadius: 12,
-                  background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+                  background: "#8b5cf6",
                   color: "#fff",
+                  fontWeight: 700,
                   fontSize: "0.85rem",
-                  fontWeight: 600,
                   textDecoration: "none",
-                  boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
                 }}>
                   + Crear proyecto
                 </Link>
@@ -296,37 +266,30 @@ export default async function Dashboard() {
                     href={`/proyectos/${p.id}`}
                     style={{
                       display: "block",
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
+                      background: "#141414",
+                      border: `1px solid ${p.color}30`,
                       borderTop: `2px solid ${p.color}`,
                       borderRadius: 18,
-                      padding: "16px",
+                      padding: "16px 14px",
                       textDecoration: "none",
                     }}
                   >
                     <div style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 12,
+                      width: 34,
+                      height: 34,
+                      borderRadius: 10,
                       background: `${p.color}18`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       marginBottom: 12,
                     }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: p.color }} />
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color }} />
                     </div>
-                    <p style={{
-                      color: "#fff",
-                      fontWeight: 600,
-                      fontSize: "0.88rem",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}>
+                    <p style={{ color: "#fff", fontWeight: 700, fontSize: "0.88rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {p.nombre}
                     </p>
-                    <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.72rem", marginTop: 3 }}>
+                    <p style={{ color: "rgba(255,255,255,0.28)", fontSize: "0.7rem", marginTop: 3 }}>
                       {p._count.eventos} evento{p._count.eventos !== 1 ? "s" : ""}
                     </p>
                   </Link>
@@ -340,4 +303,8 @@ export default async function Dashboard() {
       <Navbar />
     </>
   );
+}
+
+function completadas(tareas: { completada: boolean }[]) {
+  return tareas.filter((t) => t.completada).length;
 }

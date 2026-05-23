@@ -43,6 +43,8 @@ body {
   overscroll-behavior: none;
   /* Empuja TODO el contenido debajo del Dynamic Island / notch en todas las páginas */
   padding-top: env(safe-area-inset-top, 0px);
+  /* Previene scroll horizontal en cualquier página */
+  overflow-x: clip;
 }
 
 /* ── Solid card ─────────────────────────────── */

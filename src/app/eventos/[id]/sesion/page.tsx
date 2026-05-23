@@ -304,7 +304,7 @@ export default function SesionPage() {
                     }}
                   >
                     <div style={{ width: 24, height: 24, borderRadius: 8, border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0 }} />
-                    <span style={{ flex: 1, color: "#fff", fontSize: "0.92rem", fontWeight: 500 }}>{t.titulo}</span>
+                    <span style={{ flex: 1, minWidth: 0, color: "#fff", fontSize: "0.92rem", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.titulo}</span>
 
                     {/* Hora aviso badge */}
                     {t.horaAviso && (

@@ -59,12 +59,12 @@ export default async function EventoDetalle({
               <path d="M19 12H5M12 5l-7 7 7 7" />
             </svg>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.78rem", color: "rgba(255,255,255,0.3)" }}>
-            <Link href={`/proyectos/${evento.proyecto.id}`} style={{ color: "inherit", textDecoration: "none" }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 6, fontSize: "0.78rem", color: "rgba(255,255,255,0.3)", overflow: "hidden" }}>
+            <Link href={`/proyectos/${evento.proyecto.id}`} style={{ color: "inherit", textDecoration: "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexShrink: 1 }}>
               {evento.proyecto.nombre}
             </Link>
-            <span>/</span>
-            <span style={{ color: "rgba(255,255,255,0.6)" }}>{evento.nombre}</span>
+            <span style={{ flexShrink: 0 }}>/</span>
+            <span style={{ color: "rgba(255,255,255,0.6)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{evento.nombre}</span>
           </div>
         </header>
 

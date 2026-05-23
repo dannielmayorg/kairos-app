@@ -183,10 +183,14 @@ function TareaItem({
 
       <span style={{
         flex: 1,
+        minWidth: 0,
         fontSize: "0.88rem",
         color: tarea.completada ? "rgba(255,255,255,0.35)" : "#fff",
         textDecoration: tarea.completada ? "line-through" : "none",
         fontWeight: 500,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
       }}>
         {tarea.titulo}
       </span>

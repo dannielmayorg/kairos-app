@@ -4,22 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const transiciones: Record<string, { siguiente: string; label: string; color: string }> = {
-  PENDIENTE: { siguiente: "ACTIVO", label: "Iniciar sesión", color: "bg-green-600 hover:bg-green-500" },
-  ACTIVO: { siguiente: "COMPLETADO", label: "Completar", color: "bg-slate-700 hover:bg-slate-600" },
-  COMPLETADO: { siguiente: "PENDIENTE", label: "Reabrir", color: "bg-slate-700 hover:bg-slate-600" },
-};
-
-const estadoBadge: Record<string, string> = {
-  PENDIENTE: "text-slate-400 bg-slate-700/50",
-  ACTIVO: "text-green-400 bg-green-500/20",
-  COMPLETADO: "text-slate-500 bg-slate-800",
-};
-
-const estadoLabel: Record<string, string> = {
-  PENDIENTE: "Pendiente",
-  ACTIVO: "Activo",
-  COMPLETADO: "Completado",
+const transiciones: Record<string, { siguiente: string; label: string; lime: boolean }> = {
+  PENDIENTE:  { siguiente: "ACTIVO",     label: "Iniciar sesión", lime: true  },
+  ACTIVO:     { siguiente: "COMPLETADO", label: "Completar",      lime: false },
+  COMPLETADO: { siguiente: "PENDIENTE",  label: "Reabrir",        lime: false },
 };
 
 export default function EventoAcciones({
@@ -47,23 +35,37 @@ export default function EventoAcciones({
   };
 
   return (
-    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-      <span
-        className={`text-xs px-2 py-0.5 rounded-full font-medium ${estadoBadge[estado]}`}
-      >
-        {estadoLabel[estado]}
-      </span>
-      <div className="flex gap-2">
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+      <div style={{ display: "flex", gap: 8 }}>
         <Link
           href={`/eventos/${evento.id}/editar`}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 border border-[var(--kairos-border)] hover:text-slate-200 hover:border-slate-500 transition-colors"
+          style={{
+            padding: "6px 14px",
+            borderRadius: 10,
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.45)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            textDecoration: "none",
+            background: "transparent",
+          }}
         >
           Editar
         </Link>
         <button
           onClick={cambiarEstado}
           disabled={cargando}
-          className={`px-3 py-1.5 rounded-lg text-white text-xs font-medium transition-colors ${transicion.color} disabled:opacity-50`}
+          style={{
+            padding: "6px 14px",
+            borderRadius: 10,
+            fontSize: "0.75rem",
+            fontWeight: 700,
+            border: "none",
+            cursor: cargando ? "default" : "pointer",
+            opacity: cargando ? 0.5 : 1,
+            background: transicion.lime ? "#c5f135" : "rgba(255,255,255,0.08)",
+            color: transicion.lime ? "#000" : "rgba(255,255,255,0.6)",
+          }}
         >
           {cargando ? "..." : transicion.label}
         </button>

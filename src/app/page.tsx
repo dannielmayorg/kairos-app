@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import PushSubscriber from "@/components/PushSubscriber";
 import { formatFecha, formatHora } from "@/lib/dateUtils";
-import { sincronizarEstados } from "./api/cron/notificaciones/route";
+import { sincronizarEstados } from "@/lib/syncEstados";
 
 export const dynamic = "force-dynamic";
 
@@ -37,9 +37,10 @@ export default async function Dashboard() {
       <main style={{ background: "#000", minHeight: "100dvh" }}>
 
         {/* ── Header ──────────────────────────── */}
-        <div style={{
-          padding: "56px 20px 20px",
-          paddingTop: "max(64px, calc(14px + env(safe-area-inset-top)))",
+        <div className="safe-header" style={{
+          paddingBottom: 20,
+          paddingLeft: 20,
+          paddingRight: 20,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

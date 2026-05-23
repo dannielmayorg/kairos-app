@@ -2,17 +2,12 @@
 
 import { useState } from "react";
 
-type Tarea = {
-  id: string;
-  titulo: string;
-  prioridad: string;
-  completada: boolean;
-};
+type Tarea = { id: string; titulo: string; prioridad: string; completada: boolean };
 
-const prioridadConfig: Record<string, { label: string; color: string }> = {
-  ALTA: { label: "Alta", color: "text-red-400" },
-  MEDIA: { label: "Media", color: "text-yellow-400" },
-  BAJA: { label: "Baja", color: "text-slate-500" },
+const PRIORIDAD: Record<string, { label: string; color: string; bg: string }> = {
+  ALTA:  { label: "Alta",  color: "#ef4444", bg: "rgba(239,68,68,0.15)" },
+  MEDIA: { label: "Media", color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
+  BAJA:  { label: "Baja",  color: "rgba(255,255,255,0.3)", bg: "rgba(255,255,255,0.06)" },
 };
 
 export default function TareasPanel({
@@ -30,10 +25,11 @@ export default function TareasPanel({
   const completadas = tareas.filter((t) => t.completada);
 
   const toggleTarea = async (tarea: Tarea) => {
-    setTareas((prev) =>
-      prev.map((t) => (t.id === tarea.id ? { ...t, completada: !t.completada } : t))
-    );
-    await fetch(`/api/tareas/${tarea.id}/completar`, { method: "PATCH" });
+    setTareas((prev) => prev.map((t) => t.id === tarea.id ? { ...t, completada: !t.completada } : t));
+    const res = await fetch(`/api/tareas/${tarea.id}/completar`, { method: "PATCH" });
+    if (!res.ok) {
+      setTareas((prev) => prev.map((t) => t.id === tarea.id ? { ...t, completada: tarea.completada } : t));
+    }
   };
 
   const agregarTarea = async (e: React.FormEvent) => {
@@ -43,11 +39,7 @@ export default function TareasPanel({
     const res = await fetch("/api/tareas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventoId,
-        titulo: nuevaTarea.trim(),
-        orden: tareas.length,
-      }),
+      body: JSON.stringify({ eventoId, titulo: nuevaTarea.trim(), orden: tareas.length }),
     });
     if (res.ok) {
       const t = await res.json();
@@ -58,65 +50,82 @@ export default function TareasPanel({
   };
 
   const eliminarTarea = async (id: string) => {
+    const snapshot = tareas;
     setTareas((prev) => prev.filter((t) => t.id !== id));
-    await fetch(`/api/tareas/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/tareas/${id}`, { method: "DELETE" });
+    if (!res.ok) setTareas(snapshot);
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-slate-300">
-          Tareas{" "}
-          <span className="text-slate-500 font-normal">
-            ({pendientes.length} pendientes)
-          </span>
-        </h2>
-      </div>
+      <p style={{ fontSize: "1rem", fontWeight: 700, color: "#fff", marginBottom: 12, fontFamily: "var(--font-inter), sans-serif" }}>
+        Tareas{" "}
+        <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400 }}>
+          ({pendientes.length} pendientes)
+        </span>
+      </p>
 
-      <div className="space-y-2">
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {tareas.length === 0 && (
-          <div
-            className="card p-6 text-center text-slate-500 text-sm"
-          >
+          <div style={{ background: "#141414", borderRadius: 16, padding: "24px", textAlign: "center", color: "rgba(255,255,255,0.25)", fontSize: "0.85rem" }}>
             Sin tareas. Agrega la primera abajo.
           </div>
         )}
 
         {pendientes.map((t) => (
-          <TareaItem
-            key={t.id}
-            tarea={t}
-            onToggle={() => toggleTarea(t)}
-            onDelete={() => eliminarTarea(t.id)}
-          />
+          <TareaItem key={t.id} tarea={t} onToggle={() => toggleTarea(t)} onDelete={() => eliminarTarea(t.id)} />
         ))}
 
         {completadas.length > 0 && (
           <>
-            <p className="text-xs text-slate-600 pt-3 pb-1">Completadas</p>
+            <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.2)", padding: "8px 0 4px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              Completadas
+            </p>
             {completadas.map((t) => (
-              <TareaItem
-                key={t.id}
-                tarea={t}
-                onToggle={() => toggleTarea(t)}
-                onDelete={() => eliminarTarea(t.id)}
-              />
+              <TareaItem key={t.id} tarea={t} onToggle={() => toggleTarea(t)} onDelete={() => eliminarTarea(t.id)} />
             ))}
           </>
         )}
 
-        <form onSubmit={agregarTarea} className="card px-4 py-3 flex gap-2">
+        <form
+          onSubmit={agregarTarea}
+          style={{
+            display: "flex",
+            gap: 8,
+            background: "#141414",
+            borderRadius: 16,
+            padding: "12px 16px",
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
           <input
             type="text"
             value={nuevaTarea}
             onChange={(e) => setNuevaTarea(e.target.value)}
             placeholder="+ Nueva tarea..."
-            className="flex-1 bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none"
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: "#fff",
+              fontSize: "0.88rem",
+            }}
           />
           <button
             type="submit"
             disabled={agregando || !nuevaTarea.trim()}
-            className="text-xs px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-500 transition-colors disabled:opacity-40"
+            style={{
+              padding: "5px 14px",
+              borderRadius: 8,
+              background: nuevaTarea.trim() ? "#c5f135" : "rgba(255,255,255,0.06)",
+              color: nuevaTarea.trim() ? "#000" : "rgba(255,255,255,0.3)",
+              border: "none",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              cursor: nuevaTarea.trim() ? "pointer" : "default",
+              opacity: agregando ? 0.5 : 1,
+            }}
           >
             Agregar
           </button>
@@ -135,34 +144,75 @@ function TareaItem({
   onToggle: () => void;
   onDelete: () => void;
 }) {
-  const cfg = prioridadConfig[tarea.prioridad] ?? prioridadConfig.MEDIA;
+  const cfg = PRIORIDAD[tarea.prioridad] ?? PRIORIDAD.BAJA;
+
   return (
     <div
-      className={`card px-4 py-3 flex items-center gap-3 group ${
-        tarea.completada ? "opacity-50" : ""
-      }`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        background: tarea.completada ? "#0d0d0d" : "#141414",
+        border: `1px solid ${tarea.completada ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.06)"}`,
+        borderRadius: 14,
+        padding: "12px 14px",
+        opacity: tarea.completada ? 0.5 : 1,
+      }}
     >
       <button
         onClick={onToggle}
-        className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-          tarea.completada
-            ? "bg-indigo-600 border-indigo-600 text-white"
-            : "border-slate-600 hover:border-indigo-500"
-        }`}
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 7,
+          flexShrink: 0,
+          cursor: "pointer",
+          background: tarea.completada ? "#c5f135" : "transparent",
+          border: tarea.completada ? "none" : "2px solid rgba(255,255,255,0.2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        {tarea.completada && <span className="text-xs">✓</span>}
+        {tarea.completada && (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20,6 9,17 4,12" />
+          </svg>
+        )}
       </button>
-      <span
-        className={`flex-1 text-sm ${
-          tarea.completada ? "line-through text-slate-500" : "text-slate-200"
-        }`}
-      >
+
+      <span style={{
+        flex: 1,
+        fontSize: "0.88rem",
+        color: tarea.completada ? "rgba(255,255,255,0.35)" : "#fff",
+        textDecoration: tarea.completada ? "line-through" : "none",
+        fontWeight: 500,
+      }}>
         {tarea.titulo}
       </span>
-      <span className={`text-xs ${cfg.color}`}>{cfg.label}</span>
+
+      <span style={{
+        padding: "3px 10px",
+        borderRadius: 999,
+        fontSize: "0.68rem",
+        fontWeight: 700,
+        background: cfg.bg,
+        color: cfg.color,
+      }}>
+        {cfg.label}
+      </span>
+
       <button
         onClick={onDelete}
-        className="text-slate-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all text-xs ml-1"
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "rgba(255,255,255,0.2)",
+          fontSize: "0.8rem",
+          padding: "0 2px",
+          lineHeight: 1,
+        }}
         title="Eliminar"
       >
         ✕

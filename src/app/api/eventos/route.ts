@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TipoRecurrencia, CategoriaEvento, Prisma, Prioridad } from "@prisma/client";
+import { TipoRecurrencia, CategoriaEvento, EstadoEvento, Prisma, Prioridad } from "@prisma/client";
 import { addDays, addMonths } from "@/lib/dateUtils";
 
 export async function GET(req: NextRequest) {
@@ -8,9 +8,14 @@ export async function GET(req: NextRequest) {
   const proyectoId = searchParams.get("proyectoId");
   const estado = searchParams.get("estado");
 
+  const ESTADOS_VALIDOS = Object.values(EstadoEvento);
+  if (estado && !ESTADOS_VALIDOS.includes(estado as EstadoEvento)) {
+    return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
+  }
+
   const where: Prisma.EventoWhereInput = {};
   if (proyectoId) where.proyectoId = proyectoId;
-  if (estado) where.estado = estado as never;
+  if (estado) where.estado = estado as EstadoEvento;
 
   const eventos = await prisma.evento.findMany({
     where,
@@ -29,6 +34,7 @@ export async function POST(req: NextRequest) {
     proyectoId,
     nombre,
     descripcion,
+    icono,
     fechaInicio,
     fechaFin,
     categoria,
@@ -42,54 +48,59 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
   }
 
-  const eventoBase = await prisma.evento.create({
-    data: {
-      proyectoId,
-      nombre: nombre.trim(),
-      descripcion,
-      fechaInicio: new Date(fechaInicio),
-      fechaFin: new Date(fechaFin),
-      categoria: categoria ?? "OTRO",
-      recurrencia: recurrencia ?? "NINGUNA",
-      reglaRecurrencia: reglaRecurrencia ?? Prisma.JsonNull,
-      intervaloNotificacion: intervaloNotificacion ?? 15,
-    },
-  });
-
   const tareasValidas: { titulo: string; prioridad?: string }[] =
     tareasIniciales?.filter((t: { titulo: string }) => t.titulo?.trim()) ?? [];
 
-  if (tareasValidas.length) {
-    await prisma.tarea.createMany({
-      data: tareasValidas.map((t, i) => ({
-        eventoId: eventoBase.id,
-        titulo: t.titulo,
-        prioridad: (t.prioridad as Prioridad) ?? Prioridad.MEDIA,
-        orden: i,
-      })),
+  const eventoBase = await prisma.$transaction(async (tx) => {
+    const base = await tx.evento.create({
+      data: {
+        proyectoId,
+        nombre: nombre.trim(),
+        descripcion,
+        icono: icono ?? "📅",
+        fechaInicio: new Date(fechaInicio),
+        fechaFin: new Date(fechaFin),
+        categoria: categoria ?? "OTRO",
+        recurrencia: recurrencia ?? "NINGUNA",
+        reglaRecurrencia: reglaRecurrencia ?? Prisma.JsonNull,
+        intervaloNotificacion: intervaloNotificacion ?? 15,
+      },
     });
-  }
 
-  if (
-    recurrencia &&
-    recurrencia !== TipoRecurrencia.NINGUNA &&
-    (reglaRecurrencia?.fechaFin || reglaRecurrencia?.ocurrencias)
-  ) {
-    const instancias = generarInstancias(eventoBase, reglaRecurrencia);
-    for (const instancia of instancias) {
-      const eventoInstancia = await prisma.evento.create({ data: instancia });
-      if (tareasValidas.length) {
-        await prisma.tarea.createMany({
-          data: tareasValidas.map((t, i) => ({
-            eventoId: eventoInstancia.id,
-            titulo: t.titulo,
-            prioridad: (t.prioridad as Prioridad) ?? Prioridad.MEDIA,
-            orden: i,
-          })),
-        });
+    if (tareasValidas.length) {
+      await tx.tarea.createMany({
+        data: tareasValidas.map((t, i) => ({
+          eventoId: base.id,
+          titulo: t.titulo,
+          prioridad: (t.prioridad as Prioridad) ?? Prioridad.MEDIA,
+          orden: i,
+        })),
+      });
+    }
+
+    if (
+      recurrencia &&
+      recurrencia !== TipoRecurrencia.NINGUNA &&
+      (reglaRecurrencia?.fechaFin || reglaRecurrencia?.ocurrencias)
+    ) {
+      const instancias = generarInstancias(base, reglaRecurrencia);
+      for (const instancia of instancias) {
+        const eventoInstancia = await tx.evento.create({ data: instancia });
+        if (tareasValidas.length) {
+          await tx.tarea.createMany({
+            data: tareasValidas.map((t, i) => ({
+              eventoId: eventoInstancia.id,
+              titulo: t.titulo,
+              prioridad: (t.prioridad as Prioridad) ?? Prioridad.MEDIA,
+              orden: i,
+            })),
+          });
+        }
       }
     }
-  }
+
+    return base;
+  });
 
   return NextResponse.json(eventoBase, { status: 201 });
 }
@@ -107,6 +118,7 @@ type EventoBase = {
   proyectoId: string;
   nombre: string;
   descripcion: string | null;
+  icono: string;
   fechaInicio: Date;
   fechaFin: Date;
   categoria: CategoriaEvento;
@@ -127,12 +139,7 @@ function generarInstancias(
   const fechaLimite = regla.fechaFin ? new Date(regla.fechaFin) : new Date("2099-12-31");
   const porOcurrencias = regla.terminaCon === "ocurrencias" && !!regla.ocurrencias;
 
-  const limite = () =>
-    porOcurrencias
-      ? instancias.length < maxOcurrencias
-      : instancias.length < 365 && (instancias[instancias.length - 1]?.fechaInicio as Date | undefined) !== undefined
-        ? true
-        : true;
+  const limite = porOcurrencias ? maxOcurrencias : 365;
 
   const dentroDeRango = (fecha: Date) =>
     porOcurrencias ? instancias.length < maxOcurrencias : fecha <= fechaLimite;
@@ -141,6 +148,7 @@ function generarInstancias(
     proyecto: { connect: { id: base.proyectoId } },
     nombre: base.nombre,
     descripcion: base.descripcion,
+    icono: base.icono,
     fechaInicio: fecha,
     fechaFin: new Date(fecha.getTime() + duracion),
     categoria: base.categoria,
@@ -149,28 +157,39 @@ function generarInstancias(
     eventoOriginalId: base.id,
   });
 
-  void limite; // suprime warning de variable no usada
-
   if (
     (base.recurrencia === TipoRecurrencia.SEMANAL ||
       base.recurrencia === TipoRecurrencia.PERSONALIZADA) &&
     regla.diasSemana?.length
   ) {
-    let cursor = addDays(base.fechaInicio, 1);
-    cursor.setHours(0, 0, 0, 0);
+    // Normalizar al lunes de la semana que contiene fechaInicio
+    const dow = base.fechaInicio.getDay();
+    const offsetLunes = dow === 0 ? -6 : 1 - dow;
+    const lunesRef = addDays(base.fechaInicio, offsetLunes);
+    lunesRef.setHours(0, 0, 0, 0);
 
-    while (dentroDeRango(cursor) && instancias.length < 365) {
-      const diaSemana = cursor.getDay();
-      if (regla.diasSemana.includes(diaSemana)) {
-        const fecha = new Date(cursor);
+    // Iterar semana por semana (respetando el intervalo completo por semana)
+    let semana = 1;
+    while (instancias.length < limite) {
+      const lunesSemana = addDays(lunesRef, semana * intervalo * 7);
+
+      for (let d = 0; d < 7 && instancias.length < limite; d++) {
+        const dia = addDays(lunesSemana, d);
+        if (!regla.diasSemana.includes(dia.getDay())) continue;
+        const fecha = new Date(dia);
         fecha.setHours(hora, minutos, 0, 0);
+        if (fecha <= base.fechaInicio) continue; // excluir el evento base
+        if (!dentroDeRango(fecha)) continue;
         instancias.push(crearInstancia(fecha));
-        if (!dentroDeRango(cursor)) break;
-        if (intervalo > 1) {
-          cursor = addDays(cursor, (intervalo - 1) * 7);
-        }
       }
-      cursor = addDays(cursor, 1);
+
+      // Si el inicio de la próxima semana ya está fuera de rango, parar
+      const lunesSiguiente = addDays(lunesSemana, intervalo * 7);
+      lunesSiguiente.setHours(hora, minutos, 0, 0);
+      if (!porOcurrencias && lunesSiguiente > fechaLimite) break;
+
+      semana++;
+      if (semana > 400) break; // safety cap
     }
   } else {
     let cursor = new Date(base.fechaInicio);
@@ -189,7 +208,7 @@ function generarInstancias(
     };
 
     avanzar();
-    while (dentroDeRango(cursor) && instancias.length < 365) {
+    while (dentroDeRango(cursor) && instancias.length < limite) {
       instancias.push(crearInstancia(new Date(cursor)));
       avanzar();
     }

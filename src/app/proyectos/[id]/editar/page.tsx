@@ -61,6 +61,9 @@ export default function EditarProyecto() {
       {/* Header */}
       <header className="safe-header" style={{
         position: "sticky", top: 0, zIndex: 50,
+        paddingBottom: 14,
+        paddingLeft: 20,
+        paddingRight: 20,
         background: "rgba(0,0,0,0.9)",
         backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(255,255,255,0.07)",

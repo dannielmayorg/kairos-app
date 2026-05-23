@@ -55,8 +55,8 @@ export default function SesionPage() {
   useEffect(() => { if (mostrarInput) inputRef.current?.focus(); }, [mostrarInput]);
 
   const toggleTarea = async (tareaId: string) => {
-    await fetch(`/api/tareas/${tareaId}/completar`, { method: "PATCH" });
-    cargar();
+    const res = await fetch(`/api/tareas/${tareaId}/completar`, { method: "PATCH" });
+    if (res.ok) cargar();
   };
 
   const agregarTarea = async (e: React.FormEvent) => {
@@ -133,6 +133,9 @@ export default function SesionPage() {
       {/* Header */}
       <header className="safe-header" style={{
         position: "sticky", top: 0, zIndex: 50,
+        paddingBottom: 14,
+        paddingLeft: 20,
+        paddingRight: 20,
         background: "rgba(0,0,0,0.9)",
         backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(255,255,255,0.07)",

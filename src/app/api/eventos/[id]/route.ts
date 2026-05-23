@@ -28,6 +28,7 @@ export async function PATCH(
     data: {
       nombre: body.nombre,
       descripcion: body.descripcion,
+      icono: body.icono,
       fechaInicio: body.fechaInicio ? new Date(body.fechaInicio) : undefined,
       fechaFin: body.fechaFin ? new Date(body.fechaFin) : undefined,
       categoria: body.categoria,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { prisma } from "@/lib/prisma";
 import { enviarNotificacion } from "@/lib/webpush";
+import { sincronizarEstados } from "@/lib/syncEstados";
 
 const receiver = new Receiver({
   currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
@@ -60,12 +61,11 @@ export async function POST(req: NextRequest) {
       evento.tareas.length > 3 ? ` y ${evento.tareas.length - 3} más` : "";
     const cuerpo = `${evento.tareas.length} tarea${evento.tareas.length > 1 ? "s" : ""} pendiente${evento.tareas.length > 1 ? "s" : ""}: ${titulos}${resto}`;
 
-    // Registrar cuándo se notificó este evento
     notificaciones.push(
       prisma.evento.update({
         where: { id: evento.id },
         data: { ultimaNotificacion: ahora },
-      }).catch(() => null)
+      }).catch((err) => { console.error(`[notif] Error actualizando ultimaNotificacion evento ${evento.id}:`, err); return null; })
     );
 
     for (const sub of suscripciones) {
@@ -78,38 +78,61 @@ export async function POST(req: NextRequest) {
             body: cuerpo,
             url: `${process.env.NEXT_PUBLIC_APP_URL}/eventos/${evento.id}/sesion`,
           }
-        ).catch(() => null)
+        ).catch((err) => { console.error(`[notif] Error enviando push a ${sub.endpoint}:`, err); return null; })
       );
     }
   }
 
   await Promise.all(notificaciones);
 
+  // Notificaciones de tareas con hora específica
+  const tareasConAviso = await prisma.tarea.findMany({
+    where: {
+      completada: false,
+      avisoEnviado: false,
+      horaAviso: { not: null },
+      evento: { estado: "ACTIVO" },
+    },
+    include: { evento: { select: { id: true, nombre: true, fechaInicio: true } } },
+  });
+
+  const notifsTarea: Promise<unknown>[] = [];
+
+  for (const tarea of tareasConAviso) {
+    const [hh, mm] = tarea.horaAviso!.split(":").map(Number);
+    const fechaBase = new Date(tarea.evento.fechaInicio);
+    const avisoDT = new Date(fechaBase);
+    avisoDT.setHours(hh, mm, 0, 0);
+
+    if (ahora >= avisoDT) {
+      notifsTarea.push(
+        prisma.tarea.update({
+          where: { id: tarea.id },
+          data: { avisoEnviado: true },
+        }).catch((err) => { console.error(`[notif] Error marcando avisoEnviado tarea ${tarea.id}:`, err); return null; })
+      );
+      for (const sub of suscripciones) {
+        notifsTarea.push(
+          enviarNotificacion(
+            sub.endpoint,
+            sub.keys as { p256dh: string; auth: string },
+            {
+              title: `⏰ ${tarea.titulo}`,
+              body: `Recordatorio en "${tarea.evento.nombre}"`,
+              url: `${process.env.NEXT_PUBLIC_APP_URL}/eventos/${tarea.evento.id}/sesion`,
+            }
+          ).catch((err) => { console.error(`[notif] Error enviando aviso tarea ${tarea.id} a ${sub.endpoint}:`, err); return null; })
+        );
+      }
+    }
+  }
+
+  await Promise.all(notifsTarea);
+
   return NextResponse.json({
     procesados: eventosActivos.length,
     notificaciones: notificaciones.length,
+    avisosTarea: notifsTarea.length,
   });
 }
 
-export async function sincronizarEstados() {
-  const ahora = new Date();
-
-  // Activar eventos que deberían estar corriendo
-  await prisma.evento.updateMany({
-    where: {
-      estado: "PENDIENTE",
-      fechaInicio: { lte: ahora },
-      fechaFin: { gte: ahora },
-    },
-    data: { estado: "ACTIVO" },
-  });
-
-  // Completar eventos que ya terminaron
-  await prisma.evento.updateMany({
-    where: {
-      estado: "ACTIVO",
-      fechaFin: { lt: ahora },
-    },
-    data: { estado: "COMPLETADO" },
-  });
-}

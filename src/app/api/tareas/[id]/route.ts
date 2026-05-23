@@ -14,6 +14,8 @@ export async function PATCH(
       descripcion: body.descripcion,
       prioridad: body.prioridad,
       orden: body.orden,
+      horaAviso: body.horaAviso !== undefined ? (body.horaAviso ?? null) : undefined,
+      avisoEnviado: body.horaAviso ? false : undefined,
     },
   });
   return NextResponse.json(tarea);

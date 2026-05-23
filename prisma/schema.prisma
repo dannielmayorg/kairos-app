@@ -27,6 +27,7 @@ model Evento {
   estado           EstadoEvento    @default(PENDIENTE)
   recurrencia      TipoRecurrencia @default(NINGUNA)
   reglaRecurrencia Json?
+  icono                 String          @default("📅")
   eventoOriginalId      String?
   intervaloNotificacion Int             @default(15)
   ultimaNotificacion    DateTime?
@@ -43,6 +44,8 @@ model Tarea {
   prioridad    Prioridad @default(MEDIA)
   completada   Boolean   @default(false)
   completadaEn DateTime?
+  horaAviso    String?
+  avisoEnviado Boolean   @default(false)
   orden        Int       @default(0)
   creadoEn     DateTime  @default(now())
 }

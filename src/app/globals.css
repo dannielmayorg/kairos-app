@@ -41,6 +41,8 @@ body {
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100dvh;
   overscroll-behavior: none;
+  /* Empuja TODO el contenido debajo del Dynamic Island / notch en todas las páginas */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* ── Solid card ─────────────────────────────── */
@@ -125,11 +127,12 @@ body:has(nav[aria-label="Navegación principal"]) main {
   padding-bottom: max(72px, calc(72px + env(safe-area-inset-bottom)));
 }
 
-/* ── Safe-area header ────────────────────────── */
+/* ── Safe-area top ──────────────────────────────────────────────────────────────── */
+/* El body ya maneja el inset real (env arriba). .safe-header solo agrega respiro    */
+/* visual y, en headers sticky, fuerza el anchor justo debajo del Dynamic Island.    */
+/* top: env() !important gana sobre el inline top: 0 de los headers sticky.         */
 .safe-header {
-  /* min 44px cubre cualquier barra de estado; env() suma el notch/Dynamic Island */
-  padding-top: max(64px, calc(14px + env(safe-area-inset-top))) !important;
-  padding-bottom: 14px !important;
-  padding-left: 20px !important;
-  padding-right: 20px !important;
+  padding-top: 20px;
+  top: env(safe-area-inset-top, 0px) !important;
 }
+

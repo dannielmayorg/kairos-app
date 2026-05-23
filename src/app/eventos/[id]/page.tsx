@@ -6,7 +6,7 @@ import { formatFecha, formatHora } from "@/lib/dateUtils";
 import EventoAcciones from "./EventoAcciones";
 import TareasPanel from "./TareasPanel";
 import GoogleCalendarButton from "@/components/GoogleCalendarButton";
-import { sincronizarEstados } from "@/app/api/cron/notificaciones/route";
+import { sincronizarEstados } from "@/lib/syncEstados";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +43,9 @@ export default async function EventoDetalle({
           position: "sticky",
           top: 0,
           zIndex: 40,
+          paddingBottom: 14,
+          paddingLeft: 20,
+          paddingRight: 20,
           background: "rgba(0,0,0,0.9)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
